@@ -1,9 +1,9 @@
 joeecc
 =======
-joeecc is a playground for Elliptic Curve Cryptography in F_P. It is written in
-pure Python and aims to explain ECC in easy terms. It is neither written to be
-performant, nor side-channel resistant nor in any way suited for productive use
-at all. Please use it for its intended purpose and for it only.
+joeecc is a playground for Elliptic Curve Cryptography in F<sub>P</sub>. It is
+written in pure Python and aims to explain ECC in easy terms. It is neither
+written to be performant, nor side-channel resistant nor in any way suited for
+productive use at all. Please use it for its intended purpose and for it only.
 
 
 Tutorial
