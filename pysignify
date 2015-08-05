@@ -1,0 +1,134 @@
+#!/usr/bin/python3
+#
+#	joeecc - A small Elliptic Curve Cryptography Demonstration.
+#	Copyright (C) 2011-2015 Johannes Bauer
+#
+#	This file is part of joeecc.
+#
+#	joeecc is free software; you can redistribute it and/or modify
+#	it under the terms of the GNU General Public License as published by
+#	the Free Software Foundation; this program is ONLY licensed under
+#	version 3 of the License, later versions are explicitly excluded.
+#
+#	joeecc is distributed in the hope that it will be useful,
+#	but WITHOUT ANY WARRANTY; without even the implied warranty of
+#	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#	GNU General Public License for more details.
+#
+#	You should have received a copy of the GNU General Public License
+#	along with joeecc; if not, write to the Free Software
+#	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+#	Johannes Bauer <JohannesBauer@gmx.de>
+#
+
+import struct
+import ecc
+import base64
+import sys
+
+from MultiCommand import MultiCommand
+
+class SignifySignature(object):
+	_STRUCT = struct.Struct("< 2s 8s 64s")
+
+	def __init__(self, signature, fingerprint):
+		self._signature = signature
+		self._fingerprint = fingerprint
+
+	@property
+	def fingerprint(self):
+		return self._fingerprint
+
+	@property
+	def signature(self):
+		return self._signature
+
+	@staticmethod
+	def fromfile(filename):
+		f = open(filename, "r")
+		f.readline()
+		line = f.readline()
+		data = base64.b64decode(line.strip())
+
+		(header, fingerprint, signature) = SignifySignature._STRUCT.unpack(data)
+		assert(header == b"Ed")
+		f.close()
+
+		signature = ecc.Ed25519Signature.decode(signature)
+		return SignifySignature(signature, fingerprint)
+
+	def __str__(self):
+		return "Signature<Fingerprint = %s, Signature = %s>" % (self.fingerprint, self.signature)
+
+class SignifyPublicKey(object):
+	_STRUCT = struct.Struct("< 2s 8s 32s")
+
+	def __init__(self, pubkey, fingerprint):
+		self._pubkey = pubkey
+		self._fingerprint = fingerprint
+
+	@property
+	def fingerprint(self):
+		return self._fingerprint
+
+	@property
+	def pubkey(self):
+		return self._pubkey
+
+	@staticmethod
+	def fromfile(filename):
+		f = open(filename, "r")
+		f.readline()
+		line = f.readline()
+		data = base64.b64decode(line.strip())
+
+		(header, fingerprint, pubkey) = SignifyPublicKey._STRUCT.unpack(data)
+		assert(header == b"Ed")
+		f.close()
+
+		pubkey = ecc.Ed25519Point.decode(pubkey)
+		return SignifyPublicKey(pubkey, fingerprint)
+
+	def __str__(self):
+		return "PubKey<Fingerprint = %s, PubKey = %s>" % (self.fingerprint, self.pubkey)
+
+
+def action_verify(cmd, args):
+	if (args.contentfile is None) and (args.sigfile.endswith(".sig")):
+		contentfile = args.sigfile[:-4]
+	else:
+		contentfile = args.contentfile
+	if contentfile is None:
+		raise Exception("Cannot determine content file automatically, please specify.")
+
+	pubkey = SignifyPublicKey.fromfile(args.pubkeyfile)
+	signature = SignifySignature.fromfile(args.sigfile)
+	content = open(contentfile, "rb").read()
+
+	if pubkey.fingerprint != signature.fingerprint:
+		print("Warning: Fingerprint of supplied public key and signature file do not match.")
+
+	if pubkey.pubkey.verify_msg(content, signature.signature):
+		print("Signature verification successful.")
+		sys.exit(0)
+	else:
+		print("Signature verification FAILED!")
+		sys.exit(1)
+
+
+
+
+mc = MultiCommand()
+
+def genparser(parser):
+	parser.add_argument("-p", "--pubkeyfile", metavar = "filename", type = str, required = True, help = "File in which the public key is stored. Mandatory argument.")
+	parser.add_argument("-s", "--sigfile", metavar = "filename", type = str, required = True, help = "File in which the signature is stored. Mandatory argument.")
+	parser.add_argument("-c", "--contentfile", metavar = "filename", type = str, help = "File in which the content is stored. Will be the sigfile without trailing extension if omitted.")
+	parser.add_argument("--verbose", action = "store_true", help = "Increase verbosity during the importing process.")
+mc.register("verify", "Verify a signify signature", genparser, action = action_verify)
+
+
+mc.run(sys.argv[1:])
+
+

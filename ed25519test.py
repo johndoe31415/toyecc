@@ -1,7 +1,8 @@
+#!/usr/bin/python3
 #
 #	joeecc - A small Elliptic Curve Cryptography Demonstration.
-#	Copyright (C) 2011-2011 Johannes Bauer
-#	
+#	Copyright (C) 2011-2015 Johannes Bauer
+#
 #	This file is part of joeecc.
 #
 #	joeecc is free software; you can redistribute it and/or modify
@@ -21,32 +22,30 @@
 #	Johannes Bauer <JohannesBauer@gmx.de>
 #
 
-class Comparable():
-	def _compare(self, other, method):
-		try:
-			return method(self.cmpkey(), other.cmpkey())
-		except (AttributeError, TypeError):
-			# cmpkey not implemented, or return different type,
-			# so I can't compare with "other".
-			return NotImplemented
+import time
+import sys
+from ecc import Ed25519Keypair
+from StopWatch import StopWatch
 
-	def __lt__(self, other):
-		return self._compare(other, lambda s, o: s < o)
+tries = 1
 
-	def __le__(self, other):
-		return self._compare(other, lambda s, o: s <= o)
+if len(sys.argv) < 2:
+	with StopWatch("Key generation", noisy = True):
+		keypair = Ed25519Keypair.genkeypair()
+else:
+	with StopWatch("Key loading", noisy = True):
+		keypair = Ed25519Keypair.loadkeypair(bytes.fromhex(sys.argv[1]))
+print("Keypair:", keypair)
 
-	def __eq__(self, other):
-		return self._compare(other, lambda s, o: s == o)
+msg = b"Foobar!"
+print("Msg:", msg)
 
-	def __ge__(self, other):
-		return self._compare(other, lambda s, o: s >= o)
+for i in range(tries):
+	with StopWatch("Signing", noisy = True):
+		signature = keypair.sign_msg(msg)
+print("Sig:", signature)
 
-	def __gt__(self, other):
-		return self._compare(other, lambda s, o: s > o)
-
-	def __ne__(self, other):
-		return self._compare(other, lambda s, o: s != o)
-
-	def __hash__(self):
-		return hash(self.cmpkey())
+for i in range(tries):
+	with StopWatch("Signature verification", noisy = True):
+		print("Verify:", keypair.public.verify_msg(msg, signature))
+print("Verify wrong sig:", keypair.public.verify_msg(msg + b"x", signature))

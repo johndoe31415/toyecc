@@ -1,0 +1,22 @@
+Summary of changes from v0.01 to v0.02 (2015-08-05)
+===================================================
+
+	* Reworked a lot of code to make it more readable and have better
+	performance, modularized the code in the ecc package
+	* Use a secure RNG for everything (joeecc is still just a toy and not
+	intended for any productive use!)
+	* Support for DJB's Curve25519
+	* Tool that uses Ed25519 to verify OpenBSD "signify" signatures (does not
+	support signature creation just yet and maybe never will)
+	* Hash truncation for ECDSA is done properly now
+	* Export script for OpenSSL curves is now included and a curve database is
+	contained within the package
+
+Summary of features of v0.01 (2011-09-29)
+=========================================
+
+	* Elliptic curve cryptography in F_P
+	* Examples for ECDSA, ECDH, ECIES
+	* Examples with Brainpool curves and custom (user-generated) curves
+
+
