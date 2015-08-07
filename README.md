@@ -22,6 +22,8 @@ Features
   * Demonstration how key recovery can be done when nonces are reused within
     ECDSA
   * Curve25519 support
+  * Example of OpenBSD's signify application (generates and verifies Curve25519
+    signatures)
   * Many testcases to try out your own implementation
   * Clean Python3 code
 

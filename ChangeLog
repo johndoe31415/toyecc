@@ -1,3 +1,9 @@
+Summary of changes from v0.02 to v0.03 (2015-08-06)
+===================================================
+
+	* Updated the pysignify example to allow for signing, key generation and
+	private to public key conversion. Does not support encrypted private keys.
+
 Summary of changes from v0.01 to v0.02 (2015-08-05)
 ===================================================
 

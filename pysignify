@@ -23,9 +23,11 @@
 #
 
 import struct
-import ecc
 import base64
 import sys
+import ecc
+import hashlib
+from ecc.Random import secure_rand
 
 from MultiCommand import MultiCommand
 
@@ -89,9 +91,80 @@ class SignifyPublicKey(object):
 
 		pubkey = ecc.Ed25519Point.decode(pubkey)
 		return SignifyPublicKey(pubkey, fingerprint)
+	
+	def writetofile(self, filename):
+		header = b"Ed"
+		data = self._STRUCT.pack(header, self._fingerprint, self._pubkey.encode())
+		
+		f = open(filename, "w")
+		print("untrusted comment: pysignify public key", file = f)
+		print(base64.b64encode(data).decode("utf-8"), file = f)
+		f.close()
 
 	def __str__(self):
 		return "PubKey<Fingerprint = %s, PubKey = %s>" % (self.fingerprint, self.pubkey)
+
+
+class SignifyPrivateKey(object):
+	_STRUCT = struct.Struct("< 2s 2s I 16s 8s 8s 64s")
+
+	def __init__(self, privkey, fingerprint):
+		self._privkey = privkey
+		self._fingerprint = fingerprint
+
+	@property
+	def fingerprint(self):
+		return self._fingerprint
+
+	@property
+	def privkey(self):
+		return self._privkey
+
+	@staticmethod
+	def generate():
+		privkey = ecc.Ed25519Keypair.genkeypair()
+		fingerprint = secure_rand(8)
+		return SignifyPrivateKey(privkey, fingerprint)
+	
+	@staticmethod
+	def fromfile(filename):
+		f = open(filename, "r")
+		f.readline()
+		line = f.readline()
+		data = base64.b64decode(line.strip())
+
+		(header, kdf, kdfrounds, salt, checksum, fingerprint, seckey) = SignifyPrivateKey._STRUCT.unpack(data)
+		assert(header == b"Ed")
+		assert(kdf == b"BK")
+		f.close()
+
+		if kdfrounds > 0:
+			raise Exception("Encrypted private keys are unsupported at the moment.")
+
+		assert(hashlib.sha512(seckey).digest()[:8] == checksum)
+
+		privkey = ecc.Ed25519Keypair.loadkeypair(seckey[:32])
+		return SignifyPrivateKey(privkey, fingerprint)
+
+	def getpubkey(self):
+		return SignifyPublicKey(self._privkey.public, self._fingerprint)
+
+	def writetofile(self, filename):
+		header = b"Ed"
+		kdf = b"BK"
+		kdfrounds = 0
+		salt = bytes(16)
+		seckey = self._privkey.encode() + self._privkey.public.encode()
+		checksum = hashlib.sha512(seckey).digest()[:8]
+		data = self._STRUCT.pack(header, kdf, kdfrounds, salt, checksum, self.fingerprint, seckey)
+		
+		f = open(filename, "w")
+		print("untrusted comment: pysignify secret key", file = f)
+		print(base64.b64encode(data).decode("utf-8"), file = f)
+		f.close()
+
+	def __str__(self):
+		return "PrivKey<Fingerprint = %s, PubKey = %s>" % (self.fingerprint, self.pubkey)
 
 
 def action_verify(cmd, args):
@@ -103,6 +176,8 @@ def action_verify(cmd, args):
 		raise Exception("Cannot determine content file automatically, please specify.")
 
 	pubkey = SignifyPublicKey.fromfile(args.pubkeyfile)
+	if args.verbose:
+		print("Public key:", pubkey)
 	signature = SignifySignature.fromfile(args.sigfile)
 	content = open(contentfile, "rb").read()
 
@@ -116,8 +191,34 @@ def action_verify(cmd, args):
 		print("Signature verification FAILED!")
 		sys.exit(1)
 
+def action_sign(cmd, args):
+	if args.sigfile is None:
+		sigfile = args.contentfile + ".sig"
+	else:
+		sigfile = args.sigfile
+	
+	privkey = SignifyPrivateKey.fromfile(args.privkeyfile)
+	content = open(args.contentfile, "rb").read()
+	signature = privkey.privkey.sign_msg(content)
+	
+	signed_data = bytearray()
+	signed_data += b"Ed"
+	signed_data += privkey.fingerprint
+	signed_data += signature.encode()
 
+	f = open(sigfile, "w")
+	print("untrusted comment: signed by pysignify", file = f)
+	print(base64.b64encode(signed_data).decode("utf-8"), file = f)
+	f.close()
 
+def action_genkey(cmd, args):
+	privkey = SignifyPrivateKey.generate()
+	privkey.writetofile(args.privkeyfile)
+	privkey.getpubkey().writetofile(args.pubkeyfile)
+
+def action_getpubkey(cmd, args):
+	privkey = SignifyPrivateKey.fromfile(args.privkeyfile)
+	privkey.getpubkey().writetofile(args.pubkeyfile)
 
 mc = MultiCommand()
 
@@ -125,9 +226,27 @@ def genparser(parser):
 	parser.add_argument("-p", "--pubkeyfile", metavar = "filename", type = str, required = True, help = "File in which the public key is stored. Mandatory argument.")
 	parser.add_argument("-s", "--sigfile", metavar = "filename", type = str, required = True, help = "File in which the signature is stored. Mandatory argument.")
 	parser.add_argument("-c", "--contentfile", metavar = "filename", type = str, help = "File in which the content is stored. Will be the sigfile without trailing extension if omitted.")
-	parser.add_argument("--verbose", action = "store_true", help = "Increase verbosity during the importing process.")
+	parser.add_argument("--verbose", action = "store_true", help = "Increase verbosity during the verification process.")
 mc.register("verify", "Verify a signify signature", genparser, action = action_verify)
 
+def genparser(parser):
+	parser.add_argument("-k", "--privkeyfile", metavar = "filename", type = str, required = True, help = "File in which the private key is stored. Mandatory argument.")
+	parser.add_argument("-c", "--contentfile", metavar = "filename", type = str, required = True, help = "File in which the content that is to be signed is stored.  Mandatory argument.")
+	parser.add_argument("-s", "--sigfile", metavar = "filename", type = str, help = "File in which the signature is stored. Will be the content file plus '.sig' extension if omitted.")
+	parser.add_argument("--verbose", action = "store_true", help = "Increase verbosity during the signing process.")
+mc.register("sign", "Sign a document", genparser, action = action_sign)
+
+def genparser(parser):
+	parser.add_argument("-k", "--privkeyfile", metavar = "filename", type = str, required = True, help = "File in which the private key is stored. Mandatory argument.")
+	parser.add_argument("-p", "--pubkeyfile", metavar = "filename", type = str, required = True, help = "File in which the public key is stored. Mandatory argument.")
+	parser.add_argument("--verbose", action = "store_true", help = "Increase verbosity during the key generation process.")
+mc.register("genkey", "Generate a private/public keypair", genparser, action = action_genkey)
+
+def genparser(parser):
+	parser.add_argument("-k", "--privkeyfile", metavar = "filename", type = str, required = True, help = "File in which the private key is stored. Mandatory argument.")
+	parser.add_argument("-p", "--pubkeyfile", metavar = "filename", type = str, required = True, help = "File in which the public key shall be stored. Mandatory argument.")
+	parser.add_argument("--verbose", action = "store_true", help = "Increase verbosity during the public key extraction.")
+mc.register("getpubkey", "Extract the public key from the private key file", genparser, action = action_getpubkey)
 
 mc.run(sys.argv[1:])
 

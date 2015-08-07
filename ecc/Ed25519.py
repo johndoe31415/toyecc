@@ -219,6 +219,9 @@ class Ed25519Keypair(object):
 		assert(A.oncurve())
 		return A
 
+	def encode(self):
+		return _int2bytes(self.private, Ed25519Params.B // 8)
+
 	@staticmethod
 	def loadkeypair(privatekeydata):
 		assert(isinstance(privatekeydata, bytes))
