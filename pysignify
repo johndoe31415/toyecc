@@ -31,6 +31,8 @@ from ecc.Random import secure_rand
 
 from MultiCommand import MultiCommand
 
+Ed25519 = ecc.getcurvebyname("ed25519")
+
 class SignifySignature(object):
 	_STRUCT = struct.Struct("< 2s 8s 64s")
 
@@ -57,7 +59,7 @@ class SignifySignature(object):
 		assert(header == b"Ed")
 		f.close()
 
-		signature = ecc.Ed25519Signature.decode(signature)
+		signature = ecc.ECPrivateKey.EDDSASignature.decode(Ed25519, signature)
 		return SignifySignature(signature, fingerprint)
 
 	def __str__(self):
@@ -89,13 +91,13 @@ class SignifyPublicKey(object):
 		assert(header == b"Ed")
 		f.close()
 
-		pubkey = ecc.Ed25519Point.decode(pubkey)
+		pubkey = ecc.ECPublicKey.eddsa_decode(Ed25519, pubkey)
 		return SignifyPublicKey(pubkey, fingerprint)
-	
+
 	def writetofile(self, filename):
 		header = b"Ed"
-		data = self._STRUCT.pack(header, self._fingerprint, self._pubkey.encode())
-		
+		data = self._STRUCT.pack(header, self._fingerprint, self._pubkey.eddsa_encode())
+
 		f = open(filename, "w")
 		print("untrusted comment: pysignify public key", file = f)
 		print(base64.b64encode(data).decode("utf-8"), file = f)
@@ -122,10 +124,10 @@ class SignifyPrivateKey(object):
 
 	@staticmethod
 	def generate():
-		privkey = ecc.Ed25519Keypair.genkeypair()
+		privkey = ecc.ECPrivateKey.eddsa_generate(Ed25519)
 		fingerprint = secure_rand(8)
 		return SignifyPrivateKey(privkey, fingerprint)
-	
+
 	@staticmethod
 	def fromfile(filename):
 		f = open(filename, "r")
@@ -143,21 +145,21 @@ class SignifyPrivateKey(object):
 
 		assert(hashlib.sha512(seckey).digest()[:8] == checksum)
 
-		privkey = ecc.Ed25519Keypair.loadkeypair(seckey[:32])
+		privkey = ecc.ECPrivateKey.eddsa_decode(Ed25519, seckey[:32])
 		return SignifyPrivateKey(privkey, fingerprint)
 
 	def getpubkey(self):
-		return SignifyPublicKey(self._privkey.public, self._fingerprint)
+		return SignifyPublicKey(self._privkey.pubkey, self._fingerprint)
 
 	def writetofile(self, filename):
 		header = b"Ed"
 		kdf = b"BK"
 		kdfrounds = 0
 		salt = bytes(16)
-		seckey = self._privkey.encode() + self._privkey.public.encode()
+		seckey = self._privkey.eddsa_encode() + self._privkey.pubkey.eddsa_encode()
 		checksum = hashlib.sha512(seckey).digest()[:8]
 		data = self._STRUCT.pack(header, kdf, kdfrounds, salt, checksum, self.fingerprint, seckey)
-		
+
 		f = open(filename, "w")
 		print("untrusted comment: pysignify secret key", file = f)
 		print(base64.b64encode(data).decode("utf-8"), file = f)
@@ -184,7 +186,7 @@ def action_verify(cmd, args):
 	if pubkey.fingerprint != signature.fingerprint:
 		print("Warning: Fingerprint of supplied public key and signature file do not match.")
 
-	if pubkey.pubkey.verify_msg(content, signature.signature):
+	if pubkey.pubkey.eddsa_verify(content, signature.signature):
 		print("Signature verification successful.")
 		sys.exit(0)
 	else:
@@ -196,11 +198,11 @@ def action_sign(cmd, args):
 		sigfile = args.contentfile + ".sig"
 	else:
 		sigfile = args.sigfile
-	
+
 	privkey = SignifyPrivateKey.fromfile(args.privkeyfile)
 	content = open(args.contentfile, "rb").read()
-	signature = privkey.privkey.sign_msg(content)
-	
+	signature = privkey.privkey.eddsa_sign(content)
+
 	signed_data = bytearray()
 	signed_data += b"Ed"
 	signed_data += privkey.fingerprint

@@ -24,7 +24,8 @@
 
 import sys
 
-from ecc import AffineCurvePoint, EllipticCurveFP, getcurvebyname
+from ecc import AffineCurvePoint, ShortWeierstrassCurve, getcurvebyname
+from ecc import ECPrivateKey
 
 def separator():
 	print("-" * 150)
@@ -33,18 +34,18 @@ def separator():
 usedcurve = getcurvebyname("secp112r1")
 #usedcurve = getcurvebyname("brainpoolP160r1")
 #usedcurve = getcurvebyname("secp192k1")
-print("Selected curve parameters")
+print("Selected curve parameters:")
 print(str(usedcurve))
 separator()
 
-keypair = usedcurve.genknownkeypair(0x12345)
-print("Generated keypair")
-print(str(keypair))
+privatekey = ECPrivateKey(0x12345, usedcurve)
+print("Generated privatekey")
+print(str(privatekey))
 separator()
 
 
 ########################### Encryption example ###########################
-e = keypair.encrypt()
+e = privatekey.pubkey.ecies_encrypt()
 print("Encryption")
 print("Transmitted R  :", e["R"])
 print("Symmetric key S:", e["S"])
@@ -52,36 +53,36 @@ separator()
 
 # And decrypt at receiver
 print("Decryption")
-recovered_s = keypair.decrypt(e["R"])
+recovered_s = privatekey.ecies_decrypt(e["R"])
 print("Recovered S    :", recovered_s)
 separator()
 
 
 ########################### Signature example ###########################
 print("Signing message")
-signature = keypair.sign_msg(b"foobar", "sha1")
+signature = privatekey.ecdsa_sign(b"foobar", "sha1")
 print("r:", signature.r)
 print("s:", signature.s)
 separator()
 
 print("Verification of signature")
-print("Original message:", keypair.verify_msg(b"foobar", signature))
-print("Modified message:", keypair.verify_msg(b"foobaz", signature))
+print("Original message:", privatekey.pubkey.ecdsa_verify(b"foobar", signature))
+print("Modified message:", privatekey.pubkey.ecdsa_verify(b"foobaz", signature))
 separator()
 
 
 ########################### Identical-nonce-in-signature exploit ###########################
 print("Generating signatures with identical nonces for exploitation")
-signature1 = keypair.sign_msg(b"foobar", "sha1", k = 123456)
-signature2 = keypair.sign_msg(b"foobaz", "sha1", k = 123456)
+signature1 = privatekey.ecdsa_sign(b"foobar", "sha1", k = 123456)
+signature2 = privatekey.ecdsa_sign(b"foobaz", "sha1", k = 123456)
 
 print("r1:", signature1.r)
 print("s1:", signature1.s)
 print("r2:", signature2.r)
 print("s2:", signature2.s)
-recvr = usedcurve.exploitidenticalnoncesig(b"foobar", signature1, b"foobaz", signature2)
+recvr = privatekey.pubkey.ecdsa_exploit_reused_nonce(b"foobar", signature1, b"foobaz", signature2)
 
-print("Recovered nonce      :", recvr["nonce"])
+print("Recovered nonce      :", int(recvr["nonce"]))
 print("Recovered private key: 0x%x" % (int(recvr["privatekey"])))
 separator()
 
@@ -102,7 +103,7 @@ separator()
 
 ########################### Generating tiny curve for example purposes ###########################
 print("Generating a tiny curve")
-tinycurve = EllipticCurveFP(
+tinycurve = ShortWeierstrassCurve.ShortWeierstrassCurve(
 	2, 			# A
 	3,	 		# B
 	263, 		# p
@@ -137,7 +138,7 @@ if determine_all_points and walk_generator_points:
 
 		curpt = rdpt.clone()
 		order = 1
-		while not curpt.at_infinity:
+		while not curpt.is_neutral:
 			curpt += rdpt
 			order += 1
 		pointorders[order] = pointorders.get(order, set())
@@ -158,7 +159,7 @@ for randomnumber in range(125, 125 + 2):
 	print("Uncompressed point:", p)
 	c = p.compress()
 	print("Compressed point  :", c)
-	u = AffineCurvePoint(None, None, usedcurve).uncompress(c)
+	u = usedcurve.uncompress(c)
 	print("Uncompressed point:", u)
 	assert(u == p)
 	separator()

@@ -21,4 +21,14 @@
 #	Johannes Bauer <JohannesBauer@gmx.de>
 #
 
-from .Curve25519ExtdTests import Curve25519ExtdTests
+from .FieldElementTests import FieldElementTests
+from .FieldElementSqrtTests import FieldElementSqrtTests
+from .ECTests import ECTests
+from .CryptoOpsTests import CryptoOpsTests
+from .CurveTests import CurveTests
+from .Ed25519BasicTests import Ed25519BasicTests
+from .Ed25519ExtdTests import Ed25519ExtdTests
+from .TwEdMontConversionTests import TwEdMontConversionTests
+from .TwEdMontDomainTests import TwEdMontDomainTests
+
+Ed25519ExtdTests.set_test_scope("full")

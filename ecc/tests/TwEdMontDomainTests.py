@@ -21,32 +21,19 @@
 #	Johannes Bauer <JohannesBauer@gmx.de>
 #
 
-class Comparable(object):
-	def _compare(self, other, method):
-		try:
-			return method(self.cmpkey(), other.cmpkey())
-		except (AttributeError, TypeError):
-			# cmpkey not implemented, or return different type,
-			# so I can't compare with "other".
-			return NotImplemented
+import unittest
+import random
+from .. import getcurvebyname
 
-	def __lt__(self, other):
-		return self._compare(other, lambda s, o: s < o)
+class TwEdMontDomainTests(unittest.TestCase):
+	def setUp(self):
+		self._mont = getcurvebyname("curve25519")
+		self._twed = getcurvebyname("ed25519")
 
-	def __le__(self, other):
-		return self._compare(other, lambda s, o: s <= o)
+	def test_twed_to_mont(self):
+		mont = self._twed.to_montgomery(b = int(self._mont.b))
+		self.assertEqual(mont.domainparams, self._mont.domainparams)
 
-	def __eq__(self, other):
-		return self._compare(other, lambda s, o: s == o)
-
-	def __ge__(self, other):
-		return self._compare(other, lambda s, o: s >= o)
-
-	def __gt__(self, other):
-		return self._compare(other, lambda s, o: s > o)
-
-	def __ne__(self, other):
-		return self._compare(other, lambda s, o: s != o)
-
-	def __hash__(self):
-		return hash(self.cmpkey())
+	def test_mont_to_twed(self):
+		twed = self._mont.to_twistededwards(a = int(self._twed.a))
+		self.assertEqual(twed.domainparams, self._twed.domainparams)

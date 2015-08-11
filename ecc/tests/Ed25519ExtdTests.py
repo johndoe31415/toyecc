@@ -22,7 +22,8 @@
 #
 
 import unittest
-from ..Ed25519 import Ed25519Params, Ed25519Point, Ed25519Curve
+import random
+from .. import FieldElement, getcurvebyname, ECPrivateKey, ECPublicKey, AffineCurvePoint
 
 class Testcase(object):
 	def __init__(self, name, params):
@@ -75,27 +76,33 @@ def tcs_from_file(filename):
 		yield Testcase(tcname, parsed_values)
 	f.close()
 
-class Curve25519ExtdTests(unittest.TestCase):
+class Ed25519ExtdTests(unittest.TestCase):
+	_TEST_SCOPE = "minimal"
+
+	@classmethod
+	def set_test_scope(cls, scope):
+		cls._TEST_SCOPE = scope
+
 	def setUp(self):
-		self._curve = Ed25519Curve()
-		self._basedir = "old/ed25519/tcdata/"
+		self._basedir = "testdata/curve25519/"
+		self._curve = getcurvebyname("ed25519")
 
 	def _run_EncodePoint(self, tc):
-		point = Ed25519Point(tc["X"], tc["Y"])
-		encoded = point.encode()
+		point = AffineCurvePoint(tc["X"], tc["Y"], self._curve)
+		encoded = point.eddsa_encode()
 		self.assertTrue(isinstance(encoded, bytes))
 		self.assertTrue(len(encoded) == 32)
 		self.assertEqual(encoded, tc["EncodedPoint"])
-		self.assertEqual(Ed25519Point.decode(tc["EncodedPoint"]), point)
+		self.assertEqual(AffineCurvePoint.eddsa_decode(self._curve, tc["EncodedPoint"]), point)
 
 	def _run_SignData(self, tc):
-		pubkey = Ed25519Point.decode(tc["EncodedPubKey"])
-		keypair = self._curve.loadkeypair(tc["EncodedPrivKey"])
-		self.assertEqual(keypair.public, pubkey)
-		signature = self._curve.sign_msg(keypair, tc["Message"])
+		pubkey = AffineCurvePoint.eddsa_decode(self._curve, tc["EncodedPubKey"])
+		keypair = ECPrivateKey.eddsa_decode(self._curve, tc["EncodedPrivKey"])
+		self.assertEqual(keypair.pubkey.point, pubkey)
+		signature = keypair.eddsa_sign(tc["Message"])
 		self.assertEqual(signature.encode(), tc["Signature"])
-		self.assertTrue(self._curve.verifysignature(pubkey, tc["Message"], signature))
-		self.assertFalse(self._curve.verifysignature(pubkey, tc["Message"] + b"x", signature))
+		self.assertTrue(keypair.pubkey.eddsa_verify(tc["Message"], signature))
+		self.assertFalse(keypair.pubkey.eddsa_verify(tc["Message"] + b"x", signature))
 
 	def test_encodepoint(self):
 		for testcase in tcs_from_file(self._basedir + "encodepoint.txt"):
@@ -105,6 +112,11 @@ class Curve25519ExtdTests(unittest.TestCase):
 
 	def test_djb_sigs(self):
 		for testcase in tcs_from_file(self._basedir + "djb.txt"):
+			# Skip lots of tests randomly for time reasons
+			if (self._TEST_SCOPE == "minimal") and (random.randrange(100) > 0):
+				continue
+
 			handlername = "_run_" + testcase.name
 			handler = getattr(self, handlername)
 			handler(testcase)
+

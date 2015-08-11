@@ -21,7 +21,12 @@
 #	Johannes Bauer <JohannesBauer@gmx.de>
 #
 
-from .ModIntTests import ModIntTests
+from .FieldElementTests import FieldElementTests
+from .FieldElementSqrtTests import FieldElementSqrtTests
 from .ECTests import ECTests
 from .CryptoOpsTests import CryptoOpsTests
-from .Curve25519BasicTests import Curve25519BasicTests
+from .CurveTests import CurveTests
+from .Ed25519BasicTests import Ed25519BasicTests
+from .Ed25519ExtdTests import Ed25519ExtdTests
+from .TwEdMontConversionTests import TwEdMontConversionTests
+from .TwEdMontDomainTests import TwEdMontDomainTests

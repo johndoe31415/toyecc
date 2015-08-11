@@ -24,28 +24,23 @@
 
 import time
 import sys
-from ecc import Ed25519Keypair
+from ecc import getcurvebyname, ECPrivateKey
 from StopWatch import StopWatch
 
-tries = 1
+curve = getcurvebyname("ed25519")
 
 if len(sys.argv) < 2:
-	with StopWatch("Key generation", noisy = True):
-		keypair = Ed25519Keypair.genkeypair()
+	keypair = ECPrivateKey.eddsa_generate(curve)
 else:
-	with StopWatch("Key loading", noisy = True):
-		keypair = Ed25519Keypair.loadkeypair(bytes.fromhex(sys.argv[1]))
+	keypair = ECPrivateKey.loadkeypair(bytes.fromhex(sys.argv[1]))
 print("Keypair:", keypair)
 
 msg = b"Foobar!"
 print("Msg:", msg)
 
-for i in range(tries):
-	with StopWatch("Signing", noisy = True):
-		signature = keypair.sign_msg(msg)
+signature = keypair.eddsa_sign(msg)
 print("Sig:", signature)
 
-for i in range(tries):
-	with StopWatch("Signature verification", noisy = True):
-		print("Verify:", keypair.public.verify_msg(msg, signature))
-print("Verify wrong sig:", keypair.public.verify_msg(msg + b"x", signature))
+print("Verify:", keypair.pubkey.eddsa_verify(msg, signature))
+print("Verify wrong sig:", keypair.pubkey.eddsa_verify(msg + b"x", signature))
+

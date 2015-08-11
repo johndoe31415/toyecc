@@ -23,12 +23,21 @@
 
 import math
 
-from .ModInt import ModInt
-from .Comparable import Comparable
+from .FieldElement import FieldElement
+from .PointOps import PointOpEDDSAEncoding, PointOpCurveConversion
 
-class AffineCurvePoint(Comparable):
+class AffineCurvePoint(PointOpEDDSAEncoding, PointOpCurveConversion):
+	"""Represents a point on a curve in affine (x, y) representation."""
+
 	def __init__(self, x, y, curve):
-		assert(((x is None) and (y is None)) or ((x is not None) and (y is not None)))		# Either x and y are None (Point at Infty) or both are defined
+		"""Generate a curve point (x, y) on the curve 'curve'. x and y have to
+		be integers. If the neutral element of the group O (for some curves,
+		this is a point at infinity) should be created, use the static method
+		'neutral', since representations of O differ on various curves (e.g. in
+		short Weierstrass curves, they have no explicit notation in affine
+		space while on twisted Edwards curves they do."""
+		# Either x and y are None (Point at Infty) or both are defined
+		assert(((x is None) and (y is None)) or ((x is not None) and (y is not None)))
 		assert((x is None) or isinstance(x, int))
 		assert((y is None) or isinstance(y, int))
 		if x is None:
@@ -36,126 +45,86 @@ class AffineCurvePoint(Comparable):
 			self._x = None
 			self._y = None
 		else:
-			self._x = ModInt(x, curve.p)
-			self._y = ModInt(y, curve.p)
+			self._x = FieldElement(x, curve.p)
+			self._y = FieldElement(y, curve.p)
 		self._curve = curve
 
-	@property
-	def at_infinity(self):
-		return self.x is None
-
-	def setmodulus(self, modulus):
-		self._x.setmodulus(modulus)
-		self._y.setmodulus(modulus)
+	@staticmethod
+	def neutral(curve):
+		"""Returns the neutral element of the curve group."""
+		return curve.neutral()
 
 	@property
-	def modulus(self):
-		return self._x.modulus
+	def is_neutral(self):
+		"""Indicates if the point is the neutral element O of the curve (point
+		at infinity for some curves)."""
+		return self.curve.is_neutral(self)
 
 	@property
 	def x(self):
+		"""Affine X component of the point, field element of p."""
 		return self._x
 
 	@property
 	def y(self):
+		"""Affine Y component of the point, field element of p."""
 		return self._y
 
 	@property
 	def curve(self):
+		"""Curve that the point is located on."""
 		return self._curve
 
-	def clone(self):
-		return AffineCurvePoint(int(self.x), int(self.y), self.curve)
-
-	def __iadd__(self, other):
-		assert(isinstance(other, AffineCurvePoint))
-
-		if self.at_infinity:
-			self._x = other.x
-			self._y = other.y
-		elif self == -other:
-			# K == -J, return O (point at infinity)
-			self._x = None
-			self._y = None
-		elif self == other:
-			# K == J, double self
-			s = ((3 * self._x ** 2) + self._curve.a) // (2 * self._y)
-			newx = s * s - (2 * self._x)
-			newy = s * (self._x - newx) - self._y
-			(self._x, self._y) = (newx, newy)
-		else:
-			# Point addition
-			s = (self._y - other.y) // (self._x - other.x)
-			newx = (s ** 2) - self._x - other.x
-			newy = s * (self._x - newx) - self._y
-			(self._x, self._y) = (newx, newy)
-		return self
-
-	def __isub__(self, other):
-		self += -other
-		return self
-
 	def __add__(self, other):
-		n = self.clone()
-		n += other
-		return n
+		"""Returns the point addition."""
+		assert(isinstance(other, AffineCurvePoint))
+		return self.curve.point_addition(self, other)
 
 	def __rmul__(self, other):
 		return self * other
 
-	def __mul__(self, other):
-		n = self.clone()
-		n *= other
-		return n
-
-	def __imul__(self, scalar):
-		# Scalar point multiplication
-		assert(isinstance(scalar, int))
-
-		n = self.clone()
-		self._x = None
-		self._y = None
-		if scalar > 0:
-			bitcount = math.ceil(math.log(scalar, 2)) + 1
-			for bit in range(bitcount):
-				if (scalar & (1 << bit)):
-					self += n
-				n += n
-		return self
-
-
-	def __sub__(self, other):
-		n = self.clone()
-		n -= other
-		return n
-
 	def __neg__(self):
-		n = self.clone()
-		n._y = -n.y
-		return n
+		"""Returns the point negation."""
+		return self.curve.point_conjugate(self)
 
-	def cmpkey(self):
-		return (self.x, self.y)
+	def __mul__(self, scalar):
+		"""Returns the scalar point multiplication. The scalar needs to be an
+		integer value."""
+		assert(isinstance(scalar, int))
+		assert(scalar >= 0)
+
+		result = self.curve.neutral()
+		n = self
+		if scalar > 0:
+			for bit in range(scalar.bit_length()):
+				if (scalar & (1 << bit)):
+					result = result + n
+				n = n + n
+		return result
+
+	def __eq__(self, other):
+		return (self.x, self.y) == (other.x, other.y)
+
+	def __ne__(self, other):
+		return not (self == other)
 
 	def oncurve(self):
-		lhs = self.y * self.y
-		rhs = (self.x ** 3) + (self._curve.a * self.x) + self._curve.b
-		return lhs == rhs
+		"""Indicates if the given point is satisfying the curve equation (i.e.
+		if it is a point on the curve)."""
+		return self.curve.oncurve(self)
 
 	def compress(self):
-		return (int(self.x), int(self.y) % 2)
+		"""Returns the compressed point format (if this is possible on the
+		given curve)."""
+		return self.curve.compress(self)
 
-	def uncompress(self, compressed):
-		(x, ybit) = compressed
-		self._x = ModInt(x, self._curve.p)
-		alpha = (self._x ** 3) + (self._curve.a * self._x) + self._curve.b
-		(beta1, beta2) = alpha.sqrt()
-		if (int(beta1) % 2) == ybit:
-			self._y = beta1
-		else:
-			self._y = beta2
-		return self
+	def __repr__(self):
+		return str(self)
 
 	def __str__(self):
-		return "(0x%x, 0x%x)" % (int(self.x), int(self.y))
+		if self.is_neutral:
+			return "(neutral)"
+		else:
+			return "(0x%x, 0x%x)" % (int(self.x), int(self.y))
+
 

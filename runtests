@@ -22,7 +22,10 @@
 #	Johannes Bauer <JohannesBauer@gmx.de>
 #
 
-time python3 -m unittest ecc.tests
 if [ "$1" == "full" ]; then
 	time python3 -m unittest ecc.tests.FullTests
+elif [ "$1" != "" ]; then
+	time python3 -m unittest ecc.tests.${1}
+else
+	time python3 -m unittest ecc.tests
 fi

@@ -47,9 +47,3 @@ def secure_rand_int_between(min_value, max_value):
 	max_value (inclusive)."""
 	return secure_rand_int(max_value - min_value + 1) + min_value
 
-if __name__ == "__main__":
-	for j in range(100):
-		i = secure_rand_between(7, 8)
-		print(i)
-#		i = secure_rand_int(129)
-#		print(i)

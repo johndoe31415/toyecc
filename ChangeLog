@@ -1,3 +1,20 @@
+Summary of changes from v0.04 to v0.05 (2015-xx-xx)
+===================================================
+
+	* ?
+
+Summary of changes from v0.03 to v0.04 (2015-08-11)
+===================================================
+
+	* Massively refactored code to be able to deal with twisted Edwards
+	curves, Montgomery curves and short-formed Weierstrass curves all similary
+	ways (without explicit exceptions for Ed25519 and Curve25519)	
+	* Implemented conversion between domain parameters of twisted Edwards and
+	Montgomery curves (both directions)
+	* Implemented conversion of points of twisted Edwards to Montomery curves
+	and back. This includes conversion of Ed25519 and Curve25519 points back
+	and forth.
+
 Summary of changes from v0.02 to v0.03 (2015-08-06)
 ===================================================
 

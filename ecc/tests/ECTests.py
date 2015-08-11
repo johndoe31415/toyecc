@@ -22,13 +22,13 @@
 #
 
 import unittest
-from ..EllipticCurveFP import EllipticCurveFP
+from ..ShortWeierstrassCurve import ShortWeierstrassCurve
 from ..AffineCurvePoint import AffineCurvePoint
 from .. import getcurvebyname
 
 class ECTests(unittest.TestCase):
 	def test_basic1(self):
-		e = EllipticCurveFP(-3, 5, 23, 0, 0, 13, 22)
+		e = ShortWeierstrassCurve(-3, 5, 23, 0, 0, 13, 22)
 		x = AffineCurvePoint(21, 16, e)
 		y = AffineCurvePoint(14, 19, e)
 		self.assertTrue(x.oncurve())
@@ -41,7 +41,7 @@ class ECTests(unittest.TestCase):
 		self.assertEqual((y + y), AffineCurvePoint(21, 7, e))
 
 	def test_basic2(self):
-		e = EllipticCurveFP(2, 5, 23, 0, 0, 9, 4)
+		e = ShortWeierstrassCurve(2, 5, 23, 0, 0, 9, 4)
 		x = AffineCurvePoint(9, 4, e)
 		y = AffineCurvePoint(10, 6, e)
 		# (9, 4) + (10, 6) = (8, 21)
@@ -61,8 +61,8 @@ class ECTests(unittest.TestCase):
 
 	def test_basic3(self):
 		# Testing data from http://christelbach.com/ECCalculator.aspx
-		e = EllipticCurveFP(3, 99, 101, 0, 0, 12, 34)
-		self.assertTrue((e.G * 0).at_infinity)
+		e = ShortWeierstrassCurve(3, 99, 101, 0, 0, 12, 34)
+		self.assertTrue((e.G * 0).is_neutral)
 		self.assertEqual((e.G * 1), e.G)
 		self.assertEqual((e.G * 2), AffineCurvePoint(93, 88, e))
 		self.assertEqual((e.G * 3), AffineCurvePoint(75, 25, e))
@@ -70,7 +70,7 @@ class ECTests(unittest.TestCase):
 		self.assertEqual((e.G * 5), AffineCurvePoint(21, 63, e))
 		self.assertEqual((e.G * 55), AffineCurvePoint(71, 28, e))
 		self.assertEqual((e.G * 123), AffineCurvePoint(91, 33, e))
-		self.assertTrue((e.G * 99).at_infinity)
+		self.assertTrue((e.G * 99).is_neutral)
 		self.assertEqual(e.countpoints(), 99)
 
 	def test_extd(self):

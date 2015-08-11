@@ -1,9 +1,12 @@
 #!/usr/bin/python3
+import sys
 import re
 import subprocess
 import collections
 
 openssl = "openssl"
+if len(sys.argv) >= 2:
+	openssl = sys.argv[1]
 
 FPDomainParams = collections.namedtuple("FPDomainParams", [ "A", "B", "p", "n", "h", "Gx", "Gy" ])
 
@@ -116,7 +119,8 @@ def print_curvefp(name, domainparams):
 			padlen = 1 + 2 * ((maxbits + 7) // 8)
 			print("		%-2s = %#0*x," % (name, padlen, value))
 
-	print("	\"%s\": EllipticCurveFP(" % (name))
+	print("	\"%s\": ShortWeierstrassCurve(" % (name))
+	print("		name = \"%s\"," % (name))
 	print_param("a", domainparams.A, maxbits)
 	print_param("b", domainparams.B, maxbits)
 	print_param("p", domainparams.p, maxbits)
@@ -127,7 +131,7 @@ def print_curvefp(name, domainparams):
 	print("	),")
 
 
-for curvename in openssl_get_all_curvenames():
+for curvename in sorted(openssl_get_all_curvenames()):
 	output = openssl_get_repr(curvename)
 	domainparams = parse_curvefp(output)
 	print_curvefp(curvename, domainparams)
