@@ -33,7 +33,7 @@ class MontgomeryCurve(EllipticCurve):
 	"""Represents an elliptic curve over a finite field F_P that satisfies the
 	Montgomery equation by^2 = x^3 + ax^2 + x."""
 
-	def __init__(self, a, b, p, n, Gx, Gy, **kwargs):
+	def __init__(self, a, b, p, n, h, Gx, Gy, **kwargs):
 		"""Create an elliptic Montgomery curve given the equation coefficients
 		a and b, the curve modulus p, the order of the curve n, the cofactor of
 		the curve h and the generator point G's X and Y coordinates in affine
@@ -44,21 +44,26 @@ class MontgomeryCurve(EllipticCurve):
 		assert(isinstance(b, int))		# Curve coefficent B
 		assert(isinstance(p, int))		# Modulus
 		assert(isinstance(n, int))		# Order
-		assert(isinstance(Gx, int))		# Generator Point X
-		assert(isinstance(Gy, int))		# Generator Point Y
+		assert(isinstance(h, int))		# Cofactor
+		assert((Gx is None) or isinstance(Gx, int))		# Generator Point X
+		assert((Gy is None) or isinstance(Gy, int))		# Generator Point Y
 		self._a = FieldElement(a, p)
 		self._b = FieldElement(b, p)
 		self._p = p
 		self._n = n
+		self._h = h
 		self._name = kwargs.get("name")
 
 		# Check that the curve is not singular
 		assert(self.b * ((self.a ** 2) - 4) != 0)
 
-		# Check that the generator G is on the curve
-		if (Gx > 0) and (Gy > 0):
+		if (Gx is not None) or (Gy is not None):
+			# Check that the generator G is on the curve
 			self._G = AffineCurvePoint(Gx, Gy, self)
 			assert(self._G.oncurve())
+
+			# Check that the generator G is of curve order
+			assert((self.n * self.G).is_neutral)
 		else:
 			self._G = None
 
@@ -85,13 +90,17 @@ class MontgomeryCurve(EllipticCurve):
 	@property
 	def n(self):
 		return self._n
+	
+	@property
+	def h(self):
+		return self._h
 
 	@property
 	def G(self):
 		return self._G
 
 	def oncurve(self, P):
-		return (self.b * P.y ** 2) == (P.x ** 3) + (self.a * (P.x ** 2)) + P.x
+		return (P.is_neutral) or ((self.b * P.y ** 2) == (P.x ** 3) + (self.a * (P.x ** 2)) + P.x)
 
 	def point_conjugate(self, P):
 		return AffineCurvePoint(int(P.x), int(-P.y), self)
@@ -147,8 +156,9 @@ class MontgomeryCurve(EllipticCurve):
 			d = int(d),
 			p = self.p,
 			n = self.n,
-			Gx = 0,
-			Gy = 0,
+			h = self.h,
+			Gx = None,
+			Gy = None,
 		)
 
 		# Convert the generator point to the new curve
@@ -160,6 +170,7 @@ class MontgomeryCurve(EllipticCurve):
 			d = int(d),
 			p = self.p,
 			n = self.n,
+			h = self.h,
 			Gx = int(G_twed.x),
 			Gy = int(G_twed.y),
 		)
@@ -170,4 +181,4 @@ class MontgomeryCurve(EllipticCurve):
 		if self.hasname:
 			return "MontgomeryCurve<%s>" % (self.name)
 		else:
-			return "MontgomeryCurve<0x%x y^2 = x^3 + 0x%x x^2 + x>" % (int(self.b), int(self.a))
+			return "MontgomeryCurve<0x%x y^2 = x^3 + 0x%x x^2 + x mod 0x%x>" % (int(self.b), int(self.a), int(self.p))

@@ -86,7 +86,7 @@ class FieldElement(object):
 		assert(q * (2 ** s) == self.modulus - 1)
 
 		while True:
-			z = FieldElement(random.randrange(self.modulus), self.modulus)
+			z = FieldElement(random.randint(1, self.modulus - 1), self.modulus)
 			if z.is_qnr:
 				break
 		assert(z.is_qnr)
@@ -99,7 +99,6 @@ class FieldElement(object):
 			for i in range(1, m):
 				if int(t ** (1 << i)) == 1:
 					break
-
 
 			b = c ** (1 << (m - i - 1))
 			r = r * b
@@ -143,7 +142,8 @@ class FieldElement(object):
 
 	def sigint(self):
 		"""Returns a signed integer if the negative value is less than 10
-		decimal digits."""
+		decimal digits and the absolute negated value is smaller than the
+		absolute positive value."""
 		neg = abs(int(-self))
 		if (neg < int(self)) and (neg < 1000000000):
 			return -neg

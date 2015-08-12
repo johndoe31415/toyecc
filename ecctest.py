@@ -113,43 +113,14 @@ tinycurve = ShortWeierstrassCurve.ShortWeierstrassCurve(
 	39			# G_y
 )
 print(str(tinycurve))
-print("Curve is of order", tinycurve.countpoints())
+print("Curve order is #E(F_p) = %d" % (tinycurve.curve_order))
+print("Generator is of order %d" % (tinycurve.G.naive_order_calculation()))
 
-determine_all_points = False		# This takes long
-walk_generator_points = False		# This takes long
-
-if determine_all_points:
-	points = set()
-	g = None
-	for x in range(tinycurve.getp()):
-		p = tinycurve.getpointwithx(x)
-		if p:
-			print(p[0], p[1])
-			points.add(p[0])
-			points.add(p[1])
-	print("Curve has %d distinct points (plus one at infinity)." % (len(points)))
-
-
-if determine_all_points and walk_generator_points:
-	pointorders = { }
-	while len(points) > 0:
-		rdpt = points.pop()
-		print("Randomly selected curve point:", rdpt)
-
-		curpt = rdpt.clone()
-		order = 1
-		while not curpt.is_neutral:
-			curpt += rdpt
-			order += 1
-		pointorders[order] = pointorders.get(order, set())
-		pointorders[order].add(rdpt)
-
-	for order in sorted(pointorders.keys()):
-		print("Points with order %d:" % (order))
-		for point in sorted(pointorders[order]):
-			print("   %s" % (str(point)))
-
-
+print("Determining points of small order (weak points), this could take a while...")
+for point in tinycurve.enumerate_points():
+	order = point.naive_order_calculation()
+	if order <= 6:
+		print("%-20s order %d" % (str(point), order))
 separator()
 
 

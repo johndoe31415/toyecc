@@ -5,6 +5,13 @@ class EllipticCurve(object):
 	in common."""
 
 	@property
+	def curve_order(self):
+		"""Returns the order of the curve, i.e. #E(F_p). Intuitively, this is
+		the total number of points on the curve (plus maybe points at ininity,
+		depending on the curve type) that satisfy the curve equation."""
+		return self.h * self.n
+
+	@property
 	def domainparams(self):
 		"""Returns the curve parameters as a named tuple."""
 		raise Exception(NotImplemented)
@@ -31,17 +38,21 @@ class EllipticCurve(object):
 		this string can be 'shortweierstrass', 'twistededwards' or
 		'montgomery'."""
 		raise Exception(NotImplemented)
+	
+	def enumerate_points(self):
+		"""Enumerates all points on the curve, including the point at infinity
+		(if the curve has such a special point)."""
+		raise Exception(NotImplemented)
 
-	def countpoints(self, G = None):
-		if G is None:
-			G = self.G
-
-		curpt = G
-		cnt = 1
-		while not curpt.is_neutral:
-			cnt += 1
-			curpt += G
-		return cnt
+	def naive_order_calculation(self):
+		"""Naively calculates the order #E(F_p) of the curve by enumerating and
+		counting all points which fulfull the curve equation. Note that this
+		implementation only works for the smallest of curves and is
+		computationally infeasible for all practical applications."""
+		order = 0
+		for pt in self.enumerate_points():
+			order += 1
+		return order
 
 	def neutral(self):
 		"""Returns the neutral element of the curve group (for some curves,
@@ -75,3 +86,4 @@ class EllipticCurve(object):
 
 	def __ne__(self, other):
 		return not (self == other)
+

@@ -112,3 +112,16 @@ class PointOpCurveConversion(object):
 		assert(point.oncurve())
 		return point
 
+class PointOpNaiveOrderCalculation(object):
+	def naive_order_calculation(self):
+		"""Calculates the order of the point naively, i.e. by walking through
+		all points until the given neutral element is hit. Note that this only
+		works for smallest of curves and is not computationally feasible for
+		anything else."""
+		curpt = self
+		order = 1
+		while not curpt.is_neutral:
+			order += 1
+			curpt += self
+		return order
+

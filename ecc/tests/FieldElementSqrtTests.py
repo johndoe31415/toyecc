@@ -69,4 +69,12 @@ class FieldElementSqrtTests(unittest.TestCase):
 	def test_extd(self):
 		self._test_primes(self._PRIME_1_MOD_4)
 
+	def test_small_body(self):
+		p = 263
+		for i in range(1, p):
+			i = FieldElement(i, p)
+			q = i.sqr()
+			r = q.sqrt()
+			self.assertEqual(r[0] * r[0], q)
+			self.assertEqual(r[1] * r[1], q)
 

@@ -84,7 +84,7 @@ And change the message so the signature would become invalid:
 
 from .FieldElement import FieldElement
 from .AffineCurvePoint import AffineCurvePoint
-from .CurveDB import getcurvebyname, getcurvenames, getcurvesbyfilter
+from .CurveDB import getcurvedb, getcurvebyname, getcurvenames
 from .ECPrivateKey import ECPrivateKey
 from .ECPublicKey import ECPublicKey
 

@@ -1,7 +1,13 @@
-Summary of changes from v0.04 to v0.05 (2015-xx-xx)
+Summary of changes from v0.04 to v0.05 (2015-08-12)
 ===================================================
 
-	* ?
+	* Critical bugfix in twisted Edwards addition that somehow slipped through
+	all testcases before is now fixed.
+	* Included all of DJBs SafeCurves (http://safecurves.cr.yp.to/)
+	* Small bugfix in Tonelli-Shanks algorithm that would sometimes fail with
+	very small probability (p = 1 / modulus)
+	* Curve database is not initialize all at once now, but is generated lazy
+	(i.e. on first use)
 
 Summary of changes from v0.03 to v0.04 (2015-08-11)
 ===================================================

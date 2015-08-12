@@ -33,7 +33,7 @@ class TwistedEdwardsCurve(EllipticCurve):
 	"""Represents an elliptic curve over a finite field F_P that satisfies the
 	Twisted Edwards equation a x^2 + y^2 = 1 + d x^2 y^2."""
 
-	def __init__(self, a, d, p, n, Gx, Gy, **kwargs):
+	def __init__(self, a, d, p, n, h, Gx, Gy, **kwargs):
 		"""Create an elliptic Twisted Edwards curve given the equation
 		coefficients a and d, the curve field's modulus p, the order of the
 		curve n and the generator point G's X and Y coordinates in affine
@@ -43,16 +43,26 @@ class TwistedEdwardsCurve(EllipticCurve):
 		assert(isinstance(d, int))		# Curve coefficent D
 		assert(isinstance(p, int))		# Modulus
 		assert(isinstance(n, int))		# Order
-		assert(isinstance(Gx, int))		# Generator Point X
-		assert(isinstance(Gy, int))		# Generator Point Y
+		assert(isinstance(h, int))		# Cofactor
+		assert((Gx is None) or isinstance(Gx, int))		# Generator Point X
+		assert((Gy is None) or isinstance(Gy, int))		# Generator Point Y
 		self._a = FieldElement(a, p)
 		self._d = FieldElement(d, p)
 		self._p = p
 		self._n = n
+		self._h = h
 		self._name = kwargs.get("name")
-		if (Gx > 0) and (Gy > 0):
+		
+		# Check that the curve is not singular
+		assert(self.d * (1 - self.d) != 0)
+		
+		if (Gx is not None) or (Gy is not None):
+			# Check that the generator G is on the curve
 			self._G = AffineCurvePoint(Gx, Gy, self)
 			assert(self._G.oncurve())
+
+			# Check that the generator G is of curve order
+			assert((self.n * self.G).is_neutral)
 		else:
 			self._G = None
 
@@ -79,6 +89,10 @@ class TwistedEdwardsCurve(EllipticCurve):
 	@property
 	def n(self):
 		return self._n
+	
+	@property
+	def h(self):
+		return self._h
 
 	@property
 	def G(self):
@@ -88,6 +102,12 @@ class TwistedEdwardsCurve(EllipticCurve):
 	def B(self):
 		"""Returns the length of the curve's field modulus in bits plus one."""
 		return self._p.bit_length() + 1
+
+	@property
+	def is_complete(self):
+		"""Returns if the twisted Edwards curve is complete. This is the case
+		exactly when d is a quadratic non-residue modulo p."""
+		return self.d.is_qnr
 
 	def neutral(self):
 		return AffineCurvePoint(0, 1, self)
@@ -103,7 +123,7 @@ class TwistedEdwardsCurve(EllipticCurve):
 
 	def point_addition(self, P, Q):
 		x = (P.x * Q.y + Q.x * P.y) // (1 + self.d * P.x * Q.x * P.y * Q.y)
-		y = (P.y * Q.y + P.x * Q.x) // (1 - self.d * P.x * Q.x * P.y * Q.y)
+		y = (P.y * Q.y - self.a * P.x * Q.x) // (1 - self.d * P.x * Q.x * P.y * Q.y)
 		return AffineCurvePoint(int(x), int(y), self)
 
 	def to_montgomery(self, b = None):
@@ -136,8 +156,9 @@ class TwistedEdwardsCurve(EllipticCurve):
 			b = int(b),
 			p = self.p,
 			n = self.n,
-			Gx = 0,
-			Gy = 0,
+			h = self.h,
+			Gx = None,
+			Gy = None,
 		)
 
 		# Then convert the original generator point using the raw curve to
@@ -150,6 +171,7 @@ class TwistedEdwardsCurve(EllipticCurve):
 			b = int(b),
 			p = self.p,
 			n = self.n,
+			h = self.h,
 			Gx = int(G_m.x),
 			Gy = int(G_m.y),
 		)
@@ -160,5 +182,5 @@ class TwistedEdwardsCurve(EllipticCurve):
 		if self.hasname:
 			return "TwistedEdwardsCurve<%s>" % (self.name)
 		else:
-			return "TwistedEdwardsCurve<0x%x x^2 + y^2 = 1 + 0x%x x^2 y^2>" % (int(self.a), int(self.d))
+			return "TwistedEdwardsCurve<0x%x x^2 + y^2 = 1 + 0x%x x^2 y^2 mod 0x%x>" % (int(self.a), int(self.d), int(self.p))
 

@@ -43,23 +43,27 @@ class ShortWeierstrassCurve(EllipticCurve):
 		assert(isinstance(p, int))		# Modulus
 		assert(isinstance(n, int))		# Order
 		assert(isinstance(h, int))		# Cofactor
-		assert(isinstance(Gx, int))		# Generator Point X
-		assert(isinstance(Gy, int))		# Generator Point Y
+		assert((Gx is None) or isinstance(Gx, int))		# Generator Point X
+		assert((Gy is None) or isinstance(Gy, int))		# Generator Point Y
 		self._a = FieldElement(a, p)
 		self._b = FieldElement(b, p)
 		self._p = p
 		self._n = n
 		self._h = h
 		self._name = kwargs.get("name")
-		if (Gx > 0) and (Gy > 0):
-			self._G = AffineCurvePoint(Gx, Gy, self)
 
 		# Check that the curve is not singular
 		assert((4 * (self.a ** 3)) + (27 * (self.b ** 2)) != 0)
 
-		# Check that the generator G is on the curve
-		if (Gx > 0) and (Gy > 0):
+		if (Gx is not None) or (Gy is not None):
+			# Check that the generator G is on the curve
+			self._G = AffineCurvePoint(Gx, Gy, self)
 			assert(self._G.oncurve())
+
+			# Check that the generator G is of curve order
+			assert((self.n * self.G).is_neutral)
+		else:
+			self._G = None
 
 	@property
 	def domainparams(self):
@@ -102,8 +106,8 @@ class ShortWeierstrassCurve(EllipticCurve):
 		else:
 			return None
 
-	def oncurve(self, P):
-		return (P.y ** 2) == (P.x ** 3) + (self.a * P.x) + self.b
+	def oncurve(self, P):	
+		return P.is_neutral or ((P.y ** 2) == (P.x ** 3) + (self.a * P.x) + self.b)
 
 	def point_conjugate(self, P):
 		return AffineCurvePoint(int(P.x), int(-P.y), self)
@@ -112,9 +116,12 @@ class ShortWeierstrassCurve(EllipticCurve):
 		if P.is_neutral:
 			# P is at infinity, O + Q = Q
 			result = Q
+		elif Q.is_neutral:
+			# Q is at infinity, P + O = P
+			result = P
 		elif P == -Q:
 			# P == -Q, return O (point at infinity)
-			result = AffineCurvePoint.neutral(self)
+			result = self.neutral()
 		elif P == Q:
 			# P == Q, point doubling
 			s = ((3 * P.x ** 2) + self.a) // (2 * P.y)
@@ -143,8 +150,16 @@ class ShortWeierstrassCurve(EllipticCurve):
 			y = beta2
 		return AffineCurvePoint(int(x), int(y), self)
 
+	def enumerate_points(self):
+		yield self.neutral()
+		for x in range(self.p):
+			points = self.getpointwithx(x)
+			if points is not None:
+				yield points[0]
+				yield points[1]
+
 	def __str__(self):
 		if self.hasname:
 			return "ShortWeierstrassCurve<%s>" % (self.name)
 		else:
-			return "ShortWeierstrassCurve<y^2 = x^3 + 0x%x x + 0x%x>" % (int(self.a), int(self.b))
+			return "ShortWeierstrassCurve<y^2 = x^3 + 0x%x x + 0x%x mod 0x%x>" % (int(self.a), int(self.b), int(self.p))

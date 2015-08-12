@@ -71,7 +71,7 @@ class ECTests(unittest.TestCase):
 		self.assertEqual((e.G * 55), AffineCurvePoint(71, 28, e))
 		self.assertEqual((e.G * 123), AffineCurvePoint(91, 33, e))
 		self.assertTrue((e.G * 99).is_neutral)
-		self.assertEqual(e.countpoints(), 99)
+		self.assertEqual(e.naive_order_calculation(), 99)
 
 	def test_extd(self):
 		e = getcurvebyname("secp112r1")
