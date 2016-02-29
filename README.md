@@ -27,7 +27,7 @@ can be found at
 
 Features
 --------
-  * ECDSA demonastration
+  * ECDSA demonstration
   * ECIES demonstration
   * ECDH demonstration
   * Demonstration how a private key can be recovered from two ECDSA signatures
