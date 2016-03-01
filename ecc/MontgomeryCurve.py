@@ -1,6 +1,6 @@
 #
 #	joeecc - A small Elliptic Curve Cryptography Demonstration.
-#	Copyright (C) 2011-2015 Johannes Bauer
+#	Copyright (C) 2011-2016 Johannes Bauer
 #
 #	This file is part of joeecc.
 #
@@ -32,6 +32,7 @@ _MontgomeryCurveDomainParameters = collections.namedtuple("MontgomeryCurveDomain
 class MontgomeryCurve(EllipticCurve):
 	"""Represents an elliptic curve over a finite field F_P that satisfies the
 	Montgomery equation by^2 = x^3 + ax^2 + x."""
+	pretty_name = "Montgomery"
 
 	def __init__(self, a, b, p, n, h, Gx, Gy, **kwargs):
 		"""Create an elliptic Montgomery curve given the equation coefficients
@@ -90,7 +91,7 @@ class MontgomeryCurve(EllipticCurve):
 	@property
 	def n(self):
 		return self._n
-	
+
 	@property
 	def h(self):
 		return self._h

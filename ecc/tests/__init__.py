@@ -1,6 +1,6 @@
 #
 #	joeecc - A small Elliptic Curve Cryptography Demonstration.
-#	Copyright (C) 2011-2015 Johannes Bauer
+#	Copyright (C) 2011-2016 Johannes Bauer
 #
 #	This file is part of joeecc.
 #
@@ -26,6 +26,7 @@ from .FieldElementSqrtTests import FieldElementSqrtTests
 from .ECTests import ECTests
 from .CryptoOpsTests import CryptoOpsTests
 from .CurveTests import CurveTests
+from .OpenSSLCurveTests import OpenSSLCurveTests
 from .Ed25519BasicTests import Ed25519BasicTests
 from .Ed25519ExtdTests import Ed25519ExtdTests
 from .TwEdMontConversionTests import TwEdMontConversionTests

@@ -1,6 +1,6 @@
 #
 #	joeecc - A small Elliptic Curve Cryptography Demonstration.
-#	Copyright (C) 2011-2015 Johannes Bauer
+#	Copyright (C) 2011-2016 Johannes Bauer
 #
 #	This file is part of joeecc.
 #

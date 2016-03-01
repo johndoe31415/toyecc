@@ -1,6 +1,6 @@
 #
 #	joeecc - A small Elliptic Curve Cryptography Demonstration.
-#	Copyright (C) 2011-2015 Johannes Bauer
+#	Copyright (C) 2011-2016 Johannes Bauer
 #
 #	This file is part of joeecc.
 #
@@ -108,6 +108,9 @@ class AffineCurvePoint(PointOpEDDSAEncoding, PointOpCurveConversion, PointOpNaiv
 
 	def __ne__(self, other):
 		return not (self == other)
+
+	def __hash__(self):
+		return hash((self.x, self.y))
 
 	def oncurve(self):
 		"""Indicates if the given point is satisfying the curve equation (i.e.

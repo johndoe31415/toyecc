@@ -152,7 +152,8 @@ class PrivKeyOpEDDSAKeyGen(object):
 		a = PrivKeyOpEDDSAKeyGen.__eddsa_bitstring(h, curve.p.bit_length())
 
 		# Conditioning may occur for some curves. Detect this by name for now.
-		if curve.name == "ed25519":
+		# TODO: Find a better way, this is pretty screwed up.
+		if curve.name == "Ed25519":
 			# Condition lower three bits to be cleared and bit 254 to be set
 			a &= 0x3ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff8
 			a |= 0x4000000000000000000000000000000000000000000000000000000000000000

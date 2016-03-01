@@ -1,3 +1,12 @@
+Summary of changes from v0.05 to v0.06 (2016-03-01)
+===================================================
+
+	* Refactoring of curve database, include now the origin and OIDs
+	* Threw out some duplicate curves and instead added their names as aliases
+	* Added generated OpenSSL testcases
+	* Curve DB entries now have various means of displaying their pretty name
+	* Heuristic to detect Koblitz curves
+
 Summary of changes from v0.04 to v0.05 (2015-08-12)
 ===================================================
 

@@ -1,6 +1,6 @@
 #
 #	joeecc - A small Elliptic Curve Cryptography Demonstration.
-#	Copyright (C) 2011-2015 Johannes Bauer
+#	Copyright (C) 2011-2016 Johannes Bauer
 #
 #	This file is part of joeecc.
 #
@@ -32,6 +32,7 @@ _TwistedEdwardsCurveDomainParameters = collections.namedtuple("TwistedEdwardsCur
 class TwistedEdwardsCurve(EllipticCurve):
 	"""Represents an elliptic curve over a finite field F_P that satisfies the
 	Twisted Edwards equation a x^2 + y^2 = 1 + d x^2 y^2."""
+	pretty_name = "Twisted Edwards"
 
 	def __init__(self, a, d, p, n, h, Gx, Gy, **kwargs):
 		"""Create an elliptic Twisted Edwards curve given the equation
@@ -52,10 +53,10 @@ class TwistedEdwardsCurve(EllipticCurve):
 		self._n = n
 		self._h = h
 		self._name = kwargs.get("name")
-		
+
 		# Check that the curve is not singular
 		assert(self.d * (1 - self.d) != 0)
-		
+
 		if (Gx is not None) or (Gy is not None):
 			# Check that the generator G is on the curve
 			self._G = AffineCurvePoint(Gx, Gy, self)
@@ -89,7 +90,7 @@ class TwistedEdwardsCurve(EllipticCurve):
 	@property
 	def n(self):
 		return self._n
-	
+
 	@property
 	def h(self):
 		return self._h

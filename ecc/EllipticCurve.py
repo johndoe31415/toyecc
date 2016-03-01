@@ -33,12 +33,32 @@ class EllipticCurve(object):
 		return self._name
 
 	@property
+	def prettyname(self):
+		"""Returns the pretty name of the curve type. This might depend on the
+		actual curve, since it may also vary on the actual domain parameters to
+		include if the curve is a Koblitz curve or not."""
+		return self.pretty_name
+
+	@property
 	def curvetype(self):
 		"""Returns a string that corresponds to the curve type. For example,
 		this string can be 'shortweierstrass', 'twistededwards' or
 		'montgomery'."""
 		raise Exception(NotImplemented)
-	
+
+	@property
+	def domainparamdict(self):
+		"""Returns the domain parameters of the curve as a dictionary."""
+		return dict(self.domainparams._asdict())
+
+	@property
+	def security_bit_estimate(self):
+		"""Gives a haphazard estimate of the security of the underlying field,
+		in bits. For most curves, this will be half the bitsize of n (but might
+		be less, for example for Koblitz curves some bits might be
+		subtracted)."""
+		return self.domainparams.n.bit_length() // 2
+
 	def enumerate_points(self):
 		"""Enumerates all points on the curve, including the point at infinity
 		(if the curve has such a special point)."""

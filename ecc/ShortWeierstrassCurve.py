@@ -1,6 +1,6 @@
 #
 #	joeecc - A small Elliptic Curve Cryptography Demonstration.
-#	Copyright (C) 2011-2015 Johannes Bauer
+#	Copyright (C) 2011-2016 Johannes Bauer
 #
 #	This file is part of joeecc.
 #
@@ -31,6 +31,7 @@ _ShortWeierstrassCurveDomainParameters = collections.namedtuple("ShortWeierstras
 class ShortWeierstrassCurve(EllipticCurve):
 	"""Represents an elliptic curve over a finite field F_P that satisfies the
 	short Weierstrass equation y^2 = x^3 + ax + b."""
+	pretty_name = "Short Weierstrass"
 
 	def __init__(self, a, b, p, n, h, Gx, Gy, **kwargs):
 		"""Create an elliptic curve given the equation coefficients a and b,
@@ -67,11 +68,36 @@ class ShortWeierstrassCurve(EllipticCurve):
 
 	@property
 	def domainparams(self):
-		return _ShortWeierstrassCurveDomainParameters(curvetype = self.curvetype, a = self.a, b = self.d, p = self.p, n = self.n, h = self.h, G = self.G)
+		return _ShortWeierstrassCurveDomainParameters(curvetype = self.curvetype, a = self.a, b = self.b, p = self.p, n = self.n, h = self.h, G = self.G)
 
 	@property
 	def curvetype(self):
 		return "shortweierstrass"
+
+	@property
+	def is_koblitz(self):
+		"""Returns whether the curve allows for efficient computation of a map
+		\phi in the field (i.e. that the curve is commonly known as a 'Koblitz
+		Curve'). This corresponds to examples 3 and 4 of the paper "Faster
+		Point Multiplication on Elliptic Curves with Efficient Endomorphisms"
+		by Gallant, Lambert and Vanstone."""
+		return ((self.b == 0) and ((self.p % 4) == 1)) or ((self.a == 0) and ((self.p % 3) == 1))
+
+	@property
+	def security_bit_estimate(self):
+		"""Returns the bit security estimate of the curve. Subtracts four bits
+		security margin for Koblitz curves."""
+		security_bits = self.n.bit_length() // 2
+		if self.is_koblitz:
+			security_bits -= 4
+		return security_bits
+
+	@property
+	def prettyname(self):
+		if not self.is_koblitz:
+			return self.pretty_name
+		else:
+			return self.pretty_name + " (Koblitz)"
 
 	@property
 	def a(self):
@@ -106,7 +132,7 @@ class ShortWeierstrassCurve(EllipticCurve):
 		else:
 			return None
 
-	def oncurve(self, P):	
+	def oncurve(self, P):
 		return P.is_neutral or ((P.y ** 2) == (P.x ** 3) + (self.a * P.x) + self.b)
 
 	def point_conjugate(self, P):

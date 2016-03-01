@@ -2,7 +2,7 @@
 #
 #	Singleton - Singleton decorator, taken from PEP318
 #	Copyright (C) 2011-2012 Johannes Bauer
-#	
+#
 #	This file is part of jpycommon.
 #
 #	jpycommon is free software; you can redistribute it and/or modify
@@ -49,7 +49,7 @@ if __name__ == "__main__":
 	@singleton
 	class FooSingleton():
 		_barkoo = -1
-		
+
 		def __init__(self):
 			print("init called")
 
@@ -59,10 +59,10 @@ if __name__ == "__main__":
 	print("pre init")
 	x = FooSingleton()
 	print(x, x.getid())
-	
+
 	y = FooSingleton()
 	print(y, y.getid())
-	
+
 	z = FooSingleton()
 	print(z, z.getid())
 

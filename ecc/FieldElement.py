@@ -1,6 +1,6 @@
 #
 #	joeecc - A small Elliptic Curve Cryptography Demonstration.
-#	Copyright (C) 2011-2015 Johannes Bauer
+#	Copyright (C) 2011-2016 Johannes Bauer
 #
 #	This file is part of joeecc.
 #
@@ -195,8 +195,12 @@ class FieldElement(object):
 	def __ne__(self, other):
 		return not (self == other)
 
-	def __lt__(self, other):
-		return int(self) < int(other)
+	def __lt__(self, value):
+		value = self.__checktype(value)
+		return int(self) < value
+
+	def __hash__(self):
+		return hash((self._intvalue, self._modulus))
 
 	def __repr__(self):
 		return str(self)

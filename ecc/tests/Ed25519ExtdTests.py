@@ -1,6 +1,6 @@
 #
 #	joeecc - A small Elliptic Curve Cryptography Demonstration.
-#	Copyright (C) 2011-2015 Johannes Bauer
+#	Copyright (C) 2011-2016 Johannes Bauer
 #
 #	This file is part of joeecc.
 #
@@ -58,23 +58,22 @@ class Testcase(object):
 		return "Testcase<%s [%s]>" % (self.name, ", ".join(sorted(list(self._params.keys()))))
 
 def tcs_from_file(filename):
-	f = open(filename, "r")
-	for line in f:
-		line = line.rstrip("\r\n")
-		line = line.split("|")
+	with open(filename, "r") as f:
+		for line in f:
+			line = line.rstrip("\r\n")
+			line = line.split("|")
 
-		tcname = line[0]
-		prototypes = [ arg.split(":") for arg in line[1].split(",") ]
-		values = line[2:]
+			tcname = line[0]
+			prototypes = [ arg.split(":") for arg in line[1].split(",") ]
+			values = line[2:]
 
-		assert(len(prototypes) == len(values))
-		parsed_values = { }
-		for ((vartype, varname), value) in zip(prototypes, values):
-			parser = getattr(Testcase, "parse_" + vartype)
-			value = parser(value)
-			parsed_values[varname] = value
-		yield Testcase(tcname, parsed_values)
-	f.close()
+			assert(len(prototypes) == len(values))
+			parsed_values = { }
+			for ((vartype, varname), value) in zip(prototypes, values):
+				parser = getattr(Testcase, "parse_" + vartype)
+				value = parser(value)
+				parsed_values[varname] = value
+			yield Testcase(tcname, parsed_values)
 
 class Ed25519ExtdTests(unittest.TestCase):
 	_TEST_SCOPE = "minimal"

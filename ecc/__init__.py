@@ -61,7 +61,7 @@ And change the message so the signature would become invalid:
 
 #
 #	joeecc - A small Elliptic Curve Cryptography Demonstration.
-#	Copyright (C) 2011-2015 Johannes Bauer
+#	Copyright (C) 2011-2016 Johannes Bauer
 #
 #	This file is part of joeecc.
 #
@@ -84,7 +84,7 @@ And change the message so the signature would become invalid:
 
 from .FieldElement import FieldElement
 from .AffineCurvePoint import AffineCurvePoint
-from .CurveDB import getcurvedb, getcurvebyname, getcurvenames
+from .CurveDB import getcurvedb, getcurveentry, getcurvebyname, getcurvenames
 from .ECPrivateKey import ECPrivateKey
 from .ECPublicKey import ECPublicKey
 
