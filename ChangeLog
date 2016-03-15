@@ -18,6 +18,9 @@ Summary of changes from v0.06 to v0.07 (2016-xx-xx)
 	* Refactoring of the EllipticCurve class to unify basic properties of
 	elliptic curves (generator group order, generator point, cofactor, field
 	characteristic)
+	* Inheritance of docstrings via intoduction of doc_inherit() decorator
+	* Added method for retrieving the j-invariant of a ShortWeierstrassCurve
+	and a method to detect if a curve is anomaleous.
 
 Summary of changes from v0.05 to v0.06 (2016-03-01)
 ===================================================
