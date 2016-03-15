@@ -25,7 +25,7 @@
 
 import time
 
-class StopWatch():
+class StopWatch(object):
 	def __init__(self, component = None, noisy = False):
 		self._component = component
 		self._noisy = noisy
