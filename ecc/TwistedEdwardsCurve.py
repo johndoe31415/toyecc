@@ -25,6 +25,7 @@ import collections
 from .FieldElement import FieldElement
 from .AffineCurvePoint import AffineCurvePoint
 from .EllipticCurve import EllipticCurve
+from .DocInherit import doc_inherit
 import ecc.MontgomeryCurve
 
 _TwistedEdwardsCurveDomainParameters = collections.namedtuple("TwistedEdwardsCurveDomainParameters", [ "curvetype", "a", "d", "p", "n", "G" ])
@@ -57,19 +58,25 @@ class TwistedEdwardsCurve(EllipticCurve):
 			assert((self.n * self.G).is_neutral)
 
 	@property
+	@doc_inherit(EllipticCurve)
 	def domainparams(self):
 		return _TwistedEdwardsCurveDomainParameters(curvetype = self.curvetype, a = self.a, d = self.d, p = self.p, n = self.n, G = self.G)
 
 	@property
+	@doc_inherit(EllipticCurve)
 	def curvetype(self):
 		return "twistededwards"
 
 	@property
 	def a(self):
+		"""Returns the coefficient a of the curve equation a x^2 + y^2 = 1 +
+		d x^2 y^2."""
 		return self._a
 
 	@property
 	def d(self):
+		"""Returns the coefficient d of the curve equation a x^2 + y^2 = 1 +
+		d x^2 y^2."""
 		return self._d
 
 	@property
@@ -83,18 +90,23 @@ class TwistedEdwardsCurve(EllipticCurve):
 		exactly when d is a quadratic non-residue modulo p."""
 		return self.d.is_qnr
 
+	@doc_inherit(EllipticCurve)
 	def neutral(self):
 		return AffineCurvePoint(0, 1, self)
 
+	@doc_inherit(EllipticCurve)
 	def is_neutral(self, P):
 		return (P.x == 0) and (P.y == 1)
 
+	@doc_inherit(EllipticCurve)
 	def oncurve(self, P):
 		return (self.a * P.x ** 2) + P.y ** 2 == 1 + self.d * P.x ** 2 * P.y ** 2
 
+	@doc_inherit(EllipticCurve)
 	def point_conjugate(self, P):
 		return AffineCurvePoint(int(-P.x), int(P.y), self)
 
+	@doc_inherit(EllipticCurve)
 	def point_addition(self, P, Q):
 		x = (P.x * Q.y + Q.x * P.y) // (1 + self.d * P.x * Q.x * P.y * Q.y)
 		y = (P.y * Q.y - self.a * P.x * Q.x) // (1 - self.d * P.x * Q.x * P.y * Q.y)

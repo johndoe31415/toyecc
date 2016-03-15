@@ -25,6 +25,7 @@ import collections
 from .FieldElement import FieldElement
 from .AffineCurvePoint import AffineCurvePoint
 from .EllipticCurve import EllipticCurve
+from .DocInherit import doc_inherit
 
 _ShortWeierstrassCurveDomainParameters = collections.namedtuple("ShortWeierstrassCurveDomainParameters", [ "curvetype", "a", "b", "p", "n", "h", "G" ])
 
@@ -71,10 +72,12 @@ class ShortWeierstrassCurve(EllipticCurve):
 		return self.jinv in [ 0, 1728 ]
 
 	@property
+	@doc_inherit(EllipticCurve)
 	def domainparams(self):
 		return _ShortWeierstrassCurveDomainParameters(curvetype = self.curvetype, a = self.a, b = self.b, p = self.p, n = self.n, h = self.h, G = self.G)
 
 	@property
+	@doc_inherit(EllipticCurve)
 	def curvetype(self):
 		return "shortweierstrass"
 
@@ -97,12 +100,13 @@ class ShortWeierstrassCurve(EllipticCurve):
 		return security_bits
 
 	@property
+	@doc_inherit(EllipticCurve)
 	def prettyname(self):
 		if not self.is_koblitz:
 			return self.pretty_name
 		else:
 			return self.pretty_name + " (Koblitz)"
-
+	
 	@property
 	def a(self):
 		"""Returns the coefficient a of the curve equation y^2 = x^3 + ax + b."""
@@ -130,12 +134,15 @@ class ShortWeierstrassCurve(EllipticCurve):
 		else:
 			return None
 
+	@doc_inherit(EllipticCurve)
 	def oncurve(self, P):
 		return P.is_neutral or ((P.y ** 2) == (P.x ** 3) + (self.a * P.x) + self.b)
 
+	@doc_inherit(EllipticCurve)
 	def point_conjugate(self, P):
 		return AffineCurvePoint(int(P.x), int(-P.y), self)
 
+	@doc_inherit(EllipticCurve)
 	def point_addition(self, P, Q):
 		if P.is_neutral:
 			# P is at infinity, O + Q = Q
@@ -160,9 +167,11 @@ class ShortWeierstrassCurve(EllipticCurve):
 			result = AffineCurvePoint(int(newx), int(newy), self)
 		return result
 
+	@doc_inherit(EllipticCurve)
 	def compress(self, P):
 		return (int(P.x), int(P.y) % 2)
 
+	@doc_inherit(EllipticCurve)
 	def uncompress(self, compressed):
 		(x, ybit) = compressed
 		x = FieldElement(x, self.p)
@@ -174,6 +183,7 @@ class ShortWeierstrassCurve(EllipticCurve):
 			y = beta2
 		return AffineCurvePoint(int(x), int(y), self)
 
+	@doc_inherit(EllipticCurve)
 	def enumerate_points(self):
 		yield self.neutral()
 		for x in range(self.p):

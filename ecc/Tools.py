@@ -23,6 +23,7 @@
 
 import hashlib
 import base64
+import inspect
 
 def bytestoint_le(data):
 	"""Converts given bytes to a little-endian integer value."""
@@ -100,4 +101,12 @@ def is_power_of_two(value):
 			return False
 		value >>= 1
 	return False
+
+
+#def inheritdocstring(cls):
+#	for base in inspect.getmro(cls):
+#		if base.__doc__ is not None:
+#			cls.__doc__ = base.__doc__
+#			break
+#	return cls
 

@@ -25,6 +25,7 @@ import collections
 from .FieldElement import FieldElement
 from .AffineCurvePoint import AffineCurvePoint
 from .EllipticCurve import EllipticCurve
+from .DocInherit import doc_inherit
 import ecc.TwistedEdwardsCurve
 
 _MontgomeryCurveDomainParameters = collections.namedtuple("MontgomeryCurveDomainParameters", [ "curvetype", "a", "b", "p", "n", "G" ])
@@ -57,27 +58,34 @@ class MontgomeryCurve(EllipticCurve):
 			assert((self.n * self.G).is_neutral)
 
 	@property
+	@doc_inherit(EllipticCurve)
 	def domainparams(self):
 		return _MontgomeryCurveDomainParameters(curvetype = self.curvetype, a = self.a, b = self.b, p = self.p, n = self.n, G = self.G)
 
 	@property
+	@doc_inherit(EllipticCurve)
 	def curvetype(self):
 		return "montgomery"
 
 	@property
 	def a(self):
+		"""Returns the coefficient a of the curve equation by^2 = x^3 + ax^2 + x."""
 		return self._a
 
 	@property
 	def b(self):
+		"""Returns the coefficient b of the curve equation by^2 = x^3 + ax^2 + x."""
 		return self._b
 
+	@doc_inherit(EllipticCurve)
 	def oncurve(self, P):
 		return (P.is_neutral) or ((self.b * P.y ** 2) == (P.x ** 3) + (self.a * (P.x ** 2)) + P.x)
 
+	@doc_inherit(EllipticCurve)
 	def point_conjugate(self, P):
 		return AffineCurvePoint(int(P.x), int(-P.y), self)
 
+	@doc_inherit(EllipticCurve)
 	def point_addition(self, P, Q):
 		if P.is_neutral:
 			# P is at infinity, O + Q = Q
@@ -148,7 +156,6 @@ class MontgomeryCurve(EllipticCurve):
 			Gy = int(G_twed.y),
 		)
 		return twed_curve
-
 
 	def __str__(self):
 		if self.hasname:
