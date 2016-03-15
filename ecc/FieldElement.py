@@ -74,6 +74,18 @@ class FieldElement(object):
 			self._qnr = int(self ** ((self._modulus - 1) // 2)) != 1
 		return self._qnr
 
+	@property
+	def legrende_symbol(self):
+		"""Returns the Legrende symbol of the field element, i.e. 0 if the
+		element is 0 mod p, 1 if it is a quadratic residue mod p or -1 if it is
+		a quadratic non-residue mod p."""
+		if self == 0:
+			return 0
+		elif self.is_qr:
+			return 1
+		else:
+			return -1
+
 	def _tonelli_shanks_sqrt(self):
 		"""Performs the Tonelli-Shanks algorithm to determine the square root
 		on an element. Note that the algorithm only works if the value it is
@@ -137,8 +149,6 @@ class FieldElement(object):
 				return int(value)
 			else:
 				raise Exception("Cannot perform meaningful arithmetic operations on field elements in different fields.")
-		else:
-			raise TypeError("Unsupported type for operations with field element: (%s) %s" % (str(type(value)), str(value)))
 
 	def sigint(self):
 		"""Returns a signed integer if the negative value is less than 10
@@ -155,18 +165,26 @@ class FieldElement(object):
 
 	def __add__(self, value):
 		value = self.__checktype(value)
+		if value is None:
+			return NotImplemented
 		return FieldElement(int(self) + value, self.modulus)
 
 	def __sub__(self, value):
 		value = self.__checktype(value)
+		if value is None:
+			return NotImplemented
 		return FieldElement(int(self) - value, self.modulus)
 
 	def __mul__(self, value):
 		value = self.__checktype(value)
+		if value is None:
+			return NotImplemented
 		return FieldElement(int(self) * value, self.modulus)
 
 	def __floordiv__(self, value):
 		value = self.__checktype(value)
+		if value is None:
+			return NotImplemented
 		return self * FieldElement(value, self.modulus).inverse()
 
 	def __pow__(self, exponent):
@@ -190,7 +208,7 @@ class FieldElement(object):
 
 	def __eq__(self, value):
 		value = self.__checktype(value)
-		return int(self) == value
+		return int(self) == (value % self.modulus)
 
 	def __ne__(self, other):
 		return not (self == other)

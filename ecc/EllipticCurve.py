@@ -21,23 +21,62 @@
 #	Johannes Bauer <JohannesBauer@gmx.de>
 #
 
-
 from .AffineCurvePoint import AffineCurvePoint
 
 class EllipticCurve(object):
 	"""Elliptic curve base class. Provides functionality which all curves have
 	in common."""
-	def __init__(self, **kwargs):
+	def __init__(self, p, n, h, Gx, Gy, **kwargs):
+		assert(isinstance(p, int))						# Modulus
+		assert((n is None) or isinstance(n, int))		# Order
+		assert((h is None) or isinstance(h, int))		# Cofactor
+		assert((Gx is None) or isinstance(Gx, int))		# Generator Point X
+		assert((Gy is None) or isinstance(Gy, int))		# Generator Point Y
+		assert((Gx is None) == (Gy is None))			# Either both X and Y of G are set or none
+		self._p = p
+		self._n = n
+		self._h = h
+		if (Gx is not None) and (Gy is not None):
+			self._G = AffineCurvePoint(Gx, Gy, self)
+		else:
+			self._G = None
+
 		if "quirks" in kwargs:
 			self._quirks = { quirk.identifier: quirk for quirk in kwargs["quirks"] }
 		else:
 			self._quirks = { }
+	@property
+	def p(self):
+		"""Returns the prime modulus which constitutes the finite field in
+		which the curve lies."""
+		return self._p
+
+	@property
+	def n(self):
+		"""Returns the order of the subgroup that is created by the generator
+		G."""
+		return self._n
+
+	@property
+	def h(self):
+		"""Returns the cofactor of the curve, i.e. h = #E(F_p) / n. This will
+		always be an integer according to Lagrange's Theorem, because n is the
+		order of a subgroup."""
+		return self._h
+
+	@property
+	def G(self):
+		"""Returns the generator point G of the curve or None if no such point
+		was set. The generator point generates a subgroup over #E(F_p)."""
+		return self._G
 
 	@property
 	def curve_order(self):
 		"""Returns the order of the curve, i.e. #E(F_p). Intuitively, this is
 		the total number of points on the curve (plus maybe points at ininity,
 		depending on the curve type) that satisfy the curve equation."""
+		if (self.h is None) or (self.n is None):
+			raise Exception("#E(F_p) is unknown for this curve")
 		return self.h * self.n
 
 	@property
@@ -86,7 +125,7 @@ class EllipticCurve(object):
 		in bits. For most curves, this will be half the bitsize of n (but might
 		be less, for example for Koblitz curves some bits might be
 		subtracted)."""
-		return self.domainparams.n.bit_length() // 2
+		return self.n.bit_length() // 2
 
 	def enumerate_points(self):
 		"""Enumerates all points on the curve, including the point at infinity
@@ -118,6 +157,10 @@ class EllipticCurve(object):
 
 	def point_addition(self, P, Q):
 		"""Returns the sum of two points P and Q on the curve."""
+		raise Exception(NotImplemented)
+	
+	def point_conjugate(self, P):
+		"""Returns the negated point -P to a given point P."""
 		raise Exception(NotImplemented)
 
 	def compress(self, P):

@@ -1,6 +1,6 @@
 #
 #	joeecc - A small Elliptic Curve Cryptography Demonstration.
-#	Copyright (C) 2011-2016 Johannes Bauer
+#	Copyright (C) 2011-2015 Johannes Bauer
 #
 #	This file is part of joeecc.
 #
@@ -21,19 +21,21 @@
 #	Johannes Bauer <JohannesBauer@gmx.de>
 #
 
-from .FieldElementTests import FieldElementTests
-from .FieldElementSqrtTests import FieldElementSqrtTests
-from .ECTests import ECTests
-from .CryptoOpsTests import CryptoOpsTests
-from .CurveTests import CurveTests
-from .OpenSSLCurveTests import OpenSSLCurveTests
-from .Ed25519BasicTests import Ed25519BasicTests
-from .Ed25519ExtdTests import Ed25519ExtdTests
-from .TwEdMontConversionTests import TwEdMontConversionTests
-from .TwEdMontDomainTests import TwEdMontDomainTests
-from .KeyLoadStoreTests import KeyLoadStoreTests
-from .PointSerializationTests import PointSerializationTests
-from .CurveQuirkTests import CurveQuirkTests
-from .PolyTests import PolyTests
-from .DivPolyTests import DivPolyTests
-from .CRTTests import CRTTests
+import unittest
+import random
+from ..CRT import CRT
+
+class CRTTests(unittest.TestCase):
+	def test_crt(self):
+		crt = CRT()
+		crt.add(0, 5)
+		crt.add(5, 7)
+		crt.add(7, 8)
+		crt.add(7, 9)
+		crt.add(7, 11)
+		crt.add(0, 13)
+
+		result = crt.solve()
+		self.assertEqual(result, 98215)
+
+

@@ -9,6 +9,15 @@ Summary of changes from v0.06 to v0.07 (2016-xx-xx)
 	exception for certain named curves. That way, custom behavior (such as
 	setting key bits for EdDSA) can be used for any custom curve, not just
 	Ed25519.
+	* Polynomial arithmetic class with coefficients in F_P (prerequisite for
+	Schoofs Algorithm)
+	* Class for constructing division polynomials for a given elliptic curve
+	(prerequisite for Schoofs Algorithm)
+	* Solver for the chinese remainder theorem (prerequisite for Schoofs
+	Algorithm)
+	* Refactoring of the EllipticCurve class to unify basic properties of
+	elliptic curves (generator group order, generator point, cofactor, field
+	characteristic)
 
 Summary of changes from v0.05 to v0.06 (2016-03-01)
 ===================================================

@@ -39,33 +39,22 @@ class MontgomeryCurve(EllipticCurve):
 		a and b, the curve modulus p, the order of the curve n, the cofactor of
 		the curve h and the generator point G's X and Y coordinates in affine
 		representation, Gx and Gy."""
-		EllipticCurve.__init__(self, **kwargs)
+		EllipticCurve.__init__(self, p, n, h, Gx, Gy, **kwargs)
 		assert(isinstance(a, int))		# Curve coefficent A
 		assert(isinstance(b, int))		# Curve coefficent B
-		assert(isinstance(p, int))		# Modulus
-		assert(isinstance(n, int))		# Order
-		assert(isinstance(h, int))		# Cofactor
-		assert((Gx is None) or isinstance(Gx, int))		# Generator Point X
-		assert((Gy is None) or isinstance(Gy, int))		# Generator Point Y
 		self._a = FieldElement(a, p)
 		self._b = FieldElement(b, p)
-		self._p = p
-		self._n = n
-		self._h = h
 		self._name = kwargs.get("name")
 
 		# Check that the curve is not singular
 		assert(self.b * ((self.a ** 2) - 4) != 0)
 
-		if (Gx is not None) or (Gy is not None):
+		if self._G is not None:
 			# Check that the generator G is on the curve
-			self._G = AffineCurvePoint(Gx, Gy, self)
 			assert(self._G.oncurve())
 
 			# Check that the generator G is of curve order
 			assert((self.n * self.G).is_neutral)
-		else:
-			self._G = None
 
 	@property
 	def domainparams(self):
@@ -82,22 +71,6 @@ class MontgomeryCurve(EllipticCurve):
 	@property
 	def b(self):
 		return self._b
-
-	@property
-	def p(self):
-		return self._p
-
-	@property
-	def n(self):
-		return self._n
-
-	@property
-	def h(self):
-		return self._h
-
-	@property
-	def G(self):
-		return self._G
 
 	def oncurve(self, P):
 		return (P.is_neutral) or ((self.b * P.y ** 2) == (P.x ** 3) + (self.a * (P.x ** 2)) + P.x)

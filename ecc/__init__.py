@@ -89,4 +89,4 @@ from .AffineCurvePoint import AffineCurvePoint
 from .CurveDB import getcurvedb, getcurveentry, getcurvebyname, getcurvenames
 from .ECPrivateKey import ECPrivateKey
 from .ECPublicKey import ECPublicKey
-
+from .ShortWeierstrassCurve import ShortWeierstrassCurve

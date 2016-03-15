@@ -38,33 +38,37 @@ class ShortWeierstrassCurve(EllipticCurve):
 		the curve modulus p, the order of the curve n, the cofactor of the
 		curve h and the generator point G's X and Y coordinates in affine
 		representation, Gx and Gy."""
-		EllipticCurve.__init__(self, **kwargs)
+		EllipticCurve.__init__(self, p, n, h, Gx, Gy, **kwargs)
 		assert(isinstance(a, int))		# Curve coefficent A
 		assert(isinstance(b, int))		# Curve coefficent B
-		assert(isinstance(p, int))		# Modulus
-		assert(isinstance(n, int))		# Order
-		assert(isinstance(h, int))		# Cofactor
-		assert((Gx is None) or isinstance(Gx, int))		# Generator Point X
-		assert((Gy is None) or isinstance(Gy, int))		# Generator Point Y
 		self._a = FieldElement(a, p)
 		self._b = FieldElement(b, p)
-		self._p = p
-		self._n = n
-		self._h = h
 		self._name = kwargs.get("name")
 
 		# Check that the curve is not singular
 		assert((4 * (self.a ** 3)) + (27 * (self.b ** 2)) != 0)
 
-		if (Gx is not None) or (Gy is not None):
+		if self._G is not None:
 			# Check that the generator G is on the curve
-			self._G = AffineCurvePoint(Gx, Gy, self)
 			assert(self._G.oncurve())
 
 			# Check that the generator G is of curve order
 			assert((self.n * self.G).is_neutral)
-		else:
-			self._G = None
+
+	@classmethod
+	def init_rawcurve(cls, a, b, p):
+		"""Returns a raw curve which has an undiscovered amount of points
+		#E(F_p) (i.e. the domain parameters n and h are not set). This function
+		can be used to create a curve which is later completed by counting
+		#E(F_p) using Schoof's algorithm."""
+		return cls(a = a, b = b, p = p, n = None, h = None, Gx = None, Gy = None)
+
+	@property
+	def is_anomalous(self):
+		"""Returns if the curve is anomalous, i.e. if #F(p) == p. If this is
+		the case then there is an efficient method to solve the ECDLP.
+		Therefore the curve is not suitable for cryptographic use."""
+		return self.jinv in [ 0, 1728 ]
 
 	@property
 	def domainparams(self):
@@ -101,29 +105,23 @@ class ShortWeierstrassCurve(EllipticCurve):
 
 	@property
 	def a(self):
+		"""Returns the coefficient a of the curve equation y^2 = x^3 + ax + b."""
 		return self._a
 
 	@property
 	def b(self):
+		"""Returns the coefficient b of the curve equation y^2 = x^3 + ax + b."""
 		return self._b
 
 	@property
-	def p(self):
-		return self._p
-
-	@property
-	def n(self):
-		return self._n
-
-	@property
-	def h(self):
-		return self._h
-
-	@property
-	def G(self):
-		return self._G
+	def jinv(self):
+		"""Returns the j-invariant of the curve, i.e. 1728 * 4 * a^3 / (4 * a^3
+		+ 27 * b^2)."""
+		return 1728 * (4 * self.a ** 3) // ((4 * self.a ** 3) + (27 * self.b ** 2))
 
 	def getpointwithx(self, x):
+		"""Returns a tuple of two points which fulfill the curve equation or
+		None if not such points exist."""
 		assert(isinstance(x, int))
 		yy = ((FieldElement(x, self._p) ** 3) + (self._a * x) + self._b)
 		y = yy.sqrt()
