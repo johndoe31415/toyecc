@@ -27,23 +27,23 @@ from ..Polynomial import Polynomial
 
 class PolyTests(unittest.TestCase):
 	def test_intialization(self):
-		x = Polynomial(101)		
+		x = Polynomial(101)
 		terms = dict(x)
 		self.assertEqual(len(terms), 1)
 		self.assertEqual(terms[1], 1)
 
 	def test_add1(self):
-		x = Polynomial(101)		
+		x = Polynomial(101)
 		p1 = (50 * x)
 		terms = dict(p1)
 		self.assertEqual(len(terms), 1)
 		self.assertEqual(p1[1], 50)
-		
+
 		p2 = (75 * x**2)
 		terms = dict(p2)
 		self.assertEqual(len(terms), 1)
 		self.assertEqual(p2[2], 75)
-	
+
 	def test_add2(self):
 		x = Polynomial(101)
 		p = (50 * x) + (75 * x**2) + (99 * x**3)
@@ -76,7 +76,7 @@ class PolyTests(unittest.TestCase):
 		self.assertEqual(len(terms), 2)
 		self.assertEqual(terms[2], 12)
 		self.assertEqual(terms[1], 59)
-	
+
 	def test_mod2(self):
 		x = Polynomial(101)
 
@@ -86,14 +86,14 @@ class PolyTests(unittest.TestCase):
 		terms = dict(result)
 		self.assertEqual(len(terms), 1)
 		self.assertEqual(terms[1], 100)
-	
+
 	def test_mod3(self):
 		 x = Polynomial(17, 123)
 		 y = Polynomial(17, 3)
 		 r = x % y
 		 self.assertTrue(r.is_constant)
 		 self.assertEqual(r.get_constant(), 0)
-		
+
 	def test_pow(self):
 		x = Polynomial(101)
 
@@ -121,7 +121,7 @@ class PolyTests(unittest.TestCase):
 		self.assertEqual(terms[2], 42)
 		self.assertEqual(terms[1], 33)
 		self.assertEqual(terms[0], 89)
-	
+
 	def test_powmod_complex(self):
 		x = Polynomial(4451685225093714772084598273548427)
 
@@ -147,13 +147,13 @@ class PolyTests(unittest.TestCase):
 		gcd2 = p2.gcd(p1)
 		self.assertEqual(gcd1, gcd2)
 		self.assertEqual(gcd1, expect_gcd)
-		
+
 		self.assertEqual(expect_div1 * expect_gcd, p1)
 		self.assertEqual(expect_div2 * expect_gcd, p2)
 
 	def test_parse(self):
 		poly = Polynomial.parse_poly("55*x^4 + 99*x^2 - 37*x^1 + x^3 + 2*x + 4", 101)
-		
+
 		terms = dict(poly)
 		self.assertEqual(len(terms), 5)
 		self.assertEqual(terms[4], 55)
@@ -171,7 +171,7 @@ class PolyTests(unittest.TestCase):
 		r = p1 % p2
 
 		self.assertEqual((q * p2) + r, p1)
-		
+
 
 	def test_subs(self):
 		x = Polynomial(101)

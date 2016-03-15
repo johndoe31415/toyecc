@@ -34,7 +34,7 @@ class _CoeffDict(object):
 		clone = _CoeffDict()
 		clone._coeffs = dict(self._coeffs)
 		return clone
-	
+
 	@property
 	def degree(self):
 		if len(self._coeffs) > 0:
@@ -100,9 +100,9 @@ class Polynomial(object):
 	def get_constant(self):
 		assert(self.is_constant)
 		return self[0]
-	
+
 	def _clone(self):
-		clone = Polynomial(self.modulus, 0)		
+		clone = Polynomial(self.modulus, 0)
 		clone._terms = self._terms.clone()
 		return clone
 
@@ -126,7 +126,7 @@ class Polynomial(object):
 
 		while b != 0:
 			(a, b) = (b, a % b)
-		
+
 		highest_coefficient = a._terms[a.degree]
 		a = a // highest_coefficient
 		return a
@@ -148,7 +148,7 @@ class Polynomial(object):
 			return result
 		else:
 			raise Exception(NotImplemented)
-	
+
 	def __sub__(self, value):
 		if isinstance(value, int) or isinstance(value, FieldElement):
 			result = self._clone()
@@ -161,7 +161,7 @@ class Polynomial(object):
 			return result
 		else:
 			raise Exception(NotImplemented)
-	
+
 	def __pow__(self, value):
 		if value in self._expcache:
 			return self._expcache[value]
@@ -173,19 +173,19 @@ class Polynomial(object):
 			else:
 				exponent = value
 				result = Polynomial(self.modulus, 1)
-				multiplier = self		
+				multiplier = self
 				for bit in range(exponent.bit_length()):
 					if exponent & (1 << bit):
 						result = result * multiplier
 					multiplier = multiplier * multiplier
 		else:
 			raise Exception(NotImplemented)
-		
+
 		if value in self._CACHE_EXPONENTS:
 			self._expcache[value] = result
 
 		return result
-	
+
 	def powmod(self, exponent, modulus):
 		"""Returns the result of (self^exponent) % modulus. Exponent must be an
 		integer and modulus another Polynomial."""
@@ -193,17 +193,17 @@ class Polynomial(object):
 		assert((modulus is None) or isinstance(modulus, Polynomial))
 		assert(exponent >= 0)
 		result = Polynomial(self.modulus, 1)
-		multiplier = self		
+		multiplier = self
 		for bit in range(exponent.bit_length()):
 			if exponent & (1 << bit):
 				result = (result * multiplier) % modulus
-			multiplier = (multiplier * multiplier) % modulus			
+			multiplier = (multiplier * multiplier) % modulus
 		return result
 
 	@classmethod
 	def parse_poly(cls, polystr, modulus):
 		poly = Polynomial(modulus, 0)
-		
+
 		polystr = polystr.replace(" - ", " + -")
 		terms = polystr.split(" + ")
 		for term in terms:
@@ -217,7 +217,7 @@ class Polynomial(object):
 
 				result = { key: int(value) for (key, value) in result.items() if (value is not None) }
 				coeff = result.get("coeff", 1)
-				exponent = result.get("exponent", 1)				
+				exponent = result.get("exponent", 1)
 				poly._terms[exponent] += FieldElement(coeff, modulus)
 
 		return poly
@@ -237,7 +237,7 @@ class Polynomial(object):
 			while numerator.degree >= value.degree:
 				shift = numerator.degree - value.degree
 				multiplier = numerator[numerator.degree] // value[value.degree]
-				
+
 				result._terms[shift] += multiplier
 				for (exponent, coefficient) in value:
 					numerator._terms[exponent + shift] -= multiplier * coefficient
@@ -270,7 +270,7 @@ class Polynomial(object):
 			while result.degree >= value.degree:
 				shift = result.degree - value.degree
 				multiplier = result[result.degree] // value[value.degree]
-				
+
 				for (exponent, coefficient) in value:
 					result._terms[exponent + shift] -= multiplier * coefficient
 			return result
@@ -279,7 +279,7 @@ class Polynomial(object):
 
 	def __rmul__(self, value):
 		return self * value
-	
+
 	def __radd__(self, value):
 		return self + value
 
@@ -303,21 +303,21 @@ class Polynomial(object):
 	def __repr__(self):
 		return str(self)
 
-	def __str__(self):		
+	def __str__(self):
 		terms = [ ]
 		for (exponent, coefficient) in sorted(self, reverse = True):
 			if coefficient == 0:
 				continue
-		
+
 			if exponent == 0:
 				terms.append("%d" % (int(coefficient)))
 				continue
-			
+
 			elif coefficient == 1:
 				coeffstr = ""
 			else:
 				coeffstr = "%d*" % (int(coefficient))
-						
+
 			if exponent == 1:
 				termstr = "x"
 			else:

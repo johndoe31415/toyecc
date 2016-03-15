@@ -45,7 +45,7 @@ class CRT(object):
 		product = 1
 		for modulus in self._moduli.keys():
 			product *= modulus
-		
+
 		# Then determine the solution
 		solution = 0
 		for modulus in self._moduli.keys():

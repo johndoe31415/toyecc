@@ -41,8 +41,8 @@ class DivisionPolynomial(object):
 		self._cache[2] = Polynomial(self.curve.p, 2)
 		self._cache[3] = (3 * x**4) + (6 * a * x**2) + (12 * b * x) - (a**2)
 		self._cache[4] = 4 * (x**6 + (5 * a * x**4) + (20 * b * x**3) - (5 * a**2 * x**2) - (4 * a * b * x) - (8 * b**2) - (a**3))
-		self._curvepoly = x**3 + (a * x) + b		
-	
+		self._curvepoly = x**3 + (a * x) + b
+
 	@property
 	def curve(self):
 		return self._curve
@@ -51,8 +51,8 @@ class DivisionPolynomial(object):
 		if index not in self._cache:
 			m = index // 2
 			if (index % 2) == 1:
-				# The paper says this would be correct: 
-				# result = (self[m + 2] * self[m]**3) - (self[m - 1] * self[m + 1] ** 3) 
+				# The paper says this would be correct:
+				# result = (self[m + 2] * self[m]**3) - (self[m - 1] * self[m + 1] ** 3)
 				# But MIRACL does it differently. Use the MIRACL approach:
 				if (m % 2) == 0:
 					result = (self._curvepoly**2 * self[m + 2] * self[m]**3) - (self[m - 1] * self[m + 1]**3)

@@ -48,7 +48,7 @@ class TwistedEdwardsCurve(EllipticCurve):
 
 		# Check that the curve is not singular
 		assert(self.d * (1 - self.d) != 0)
-		
+
 		if self._G is not None:
 			# Check that the generator G is on the curve
 			assert(self._G.oncurve())

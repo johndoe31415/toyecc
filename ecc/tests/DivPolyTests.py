@@ -38,7 +38,7 @@ class DivPolyTests(unittest.TestCase):
 
 		terms = dict(divpoly[0])
 		self.assertEqual(len(terms), 0)
-		
+
 		terms = dict(divpoly[1])
 		self.assertEqual(len(terms), 1)
 		self.assertEqual(terms[0], 1)
@@ -53,7 +53,7 @@ class DivPolyTests(unittest.TestCase):
 		self.assertEqual(terms[1], -1976690588858450197671635644628394)
 		self.assertEqual(terms[2], -18)
 		self.assertEqual(terms[4], 3)
-		
+
 		terms = dict(divpoly[4])
 		self.assertEqual(len(terms), 6)
 		self.assertEqual(terms[0], 361727871463520656904304672391508)
@@ -62,7 +62,7 @@ class DivPolyTests(unittest.TestCase):
 		self.assertEqual(terms[3], 177118416224809665109557189789321)
 		self.assertEqual(terms[4], -60)
 		self.assertEqual(terms[6], 4)
-	
+
 	def test_next_poly_secp112r1(self):
 		curve = getcurvebyname("secp112r1")
 		divpoly = DivisionPolynomial(curve)
@@ -79,5 +79,5 @@ class DivPolyTests(unittest.TestCase):
 
 		for degree in sorted(expect_poly.keys()):
 			self.assertEqual(divpoly[degree], expect_poly[degree])
-		
+
 

@@ -158,7 +158,7 @@ class EllipticCurve(object):
 	def point_addition(self, P, Q):
 		"""Returns the sum of two points P and Q on the curve."""
 		raise Exception(NotImplemented)
-	
+
 	def point_conjugate(self, P):
 		"""Returns the negated point -P to a given point P."""
 		raise Exception(NotImplemented)
