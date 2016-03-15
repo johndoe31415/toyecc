@@ -5,6 +5,10 @@ Summary of changes from v0.06 to v0.07 (2016-xx-xx)
 	or DER representation. Facility is inactive if pyasn1 is not installed on
 	the system.
 	* Include Rigol oscilloscope curve in the curve database
+	* Curve quirks are now modelled explicity instead of being a special
+	exception for certain named curves. That way, custom behavior (such as
+	setting key bits for EdDSA) can be used for any custom curve, not just
+	Ed25519.
 
 Summary of changes from v0.05 to v0.06 (2016-03-01)
 ===================================================
