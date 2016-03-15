@@ -21,7 +21,6 @@
 #	Johannes Bauer <JohannesBauer@gmx.de>
 #
 
-
 from .PubKeyOps import PubKeyOpECDSAVerify, PubKeyOpECDSAExploitReusedNonce, PubKeyOpEDDSAVerify, PubKeyOpEDDSAEncode, PubKeyOpECIESEncrypt, PubKeyOpLoad
 
 class ECPublicKey(PubKeyOpECDSAVerify, PubKeyOpECDSAExploitReusedNonce, PubKeyOpEDDSAVerify, PubKeyOpEDDSAEncode, PubKeyOpECIESEncrypt, PubKeyOpLoad):
