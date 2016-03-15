@@ -75,7 +75,7 @@ class CryptoOpsTests(unittest.TestCase):
 		party1_privkey = ECPrivateKey.generate(curve)
 		party2_privkey = ECPrivateKey.generate(curve)
 
-
 		S1 = party1_privkey.ecdh_compute(party2_privkey.pubkey)
 		S2 = party2_privkey.ecdh_compute(party1_privkey.pubkey)
 		self.assertEqual(S1, S2)
+

@@ -31,3 +31,6 @@ from .Ed25519BasicTests import Ed25519BasicTests
 from .Ed25519ExtdTests import Ed25519ExtdTests
 from .TwEdMontConversionTests import TwEdMontConversionTests
 from .TwEdMontDomainTests import TwEdMontDomainTests
+from .KeyLoadStoreTests import KeyLoadStoreTests
+from .PointSerializationTests import PointSerializationTests
+from .CurveQuirkTests import CurveQuirkTests

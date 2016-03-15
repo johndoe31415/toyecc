@@ -2,8 +2,10 @@
 
 joeecc is a library that is supposed to demonstrate and teach how Elliptic
 Curve Cryptography (ECC) works. It is implemented in pure Python and neither
-aims to be feature-complete not side-channel resistant not secure in any way.
-Please keep this in mind when using joeecc.
+aims to be feature-complete not side-channel resistant nor secure in any way.
+Please keep this in mind when using joeecc. Certain algorithms have been
+deliberately implemented exactly without precautions against side-channel
+attacks in order to cleanly demonstrate the concepts.
 
 There is a curve database included in joeecc which already knows lots of
 interesting elliptic curves by name:

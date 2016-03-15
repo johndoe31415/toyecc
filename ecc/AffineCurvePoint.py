@@ -24,9 +24,9 @@
 import math
 
 from .FieldElement import FieldElement
-from .PointOps import PointOpEDDSAEncoding, PointOpCurveConversion, PointOpNaiveOrderCalculation
+from .PointOps import PointOpEDDSAEncoding, PointOpCurveConversion, PointOpNaiveOrderCalculation, PointOpSerialization
 
-class AffineCurvePoint(PointOpEDDSAEncoding, PointOpCurveConversion, PointOpNaiveOrderCalculation):
+class AffineCurvePoint(PointOpEDDSAEncoding, PointOpCurveConversion, PointOpNaiveOrderCalculation, PointOpSerialization):
 	"""Represents a point on a curve in affine (x, y) representation."""
 
 	def __init__(self, x, y, curve):
@@ -84,7 +84,7 @@ class AffineCurvePoint(PointOpEDDSAEncoding, PointOpCurveConversion, PointOpNaiv
 		return self * other
 
 	def __neg__(self):
-		"""Returns the point negation."""
+		"""Returns the conjugated point."""
 		return self.curve.point_conjugate(self)
 
 	def __mul__(self, scalar):

@@ -38,7 +38,7 @@ class ShortWeierstrassCurve(EllipticCurve):
 		the curve modulus p, the order of the curve n, the cofactor of the
 		curve h and the generator point G's X and Y coordinates in affine
 		representation, Gx and Gy."""
-		EllipticCurve.__init__(self)
+		EllipticCurve.__init__(self, **kwargs)
 		assert(isinstance(a, int))		# Curve coefficent A
 		assert(isinstance(b, int))		# Curve coefficent B
 		assert(isinstance(p, int))		# Modulus

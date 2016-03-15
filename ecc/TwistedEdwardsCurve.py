@@ -39,7 +39,7 @@ class TwistedEdwardsCurve(EllipticCurve):
 		coefficients a and d, the curve field's modulus p, the order of the
 		curve n and the generator point G's X and Y coordinates in affine
 		representation, Gx and Gy."""
-		EllipticCurve.__init__(self)
+		EllipticCurve.__init__(self, **kwargs)
 		assert(isinstance(a, int))		# Curve coefficent A
 		assert(isinstance(d, int))		# Curve coefficent D
 		assert(isinstance(p, int))		# Modulus

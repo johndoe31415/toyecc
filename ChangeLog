@@ -1,3 +1,11 @@
+Summary of changes from v0.06 to v0.07 (2016-xx-xx)
+===================================================
+
+	* ASN.1 parsing facility added to load EC public and private keys from PEM
+	or DER representation. Facility is inactive if pyasn1 is not installed on
+	the system.
+	* Include Rigol oscilloscope curve in the curve database
+
 Summary of changes from v0.05 to v0.06 (2016-03-01)
 ===================================================
 
@@ -23,7 +31,7 @@ Summary of changes from v0.03 to v0.04 (2015-08-11)
 
 	* Massively refactored code to be able to deal with twisted Edwards
 	curves, Montgomery curves and short-formed Weierstrass curves all similary
-	ways (without explicit exceptions for Ed25519 and Curve25519)	
+	ways (without explicit exceptions for Ed25519 and Curve25519)
 	* Implemented conversion between domain parameters of twisted Edwards and
 	Montgomery curves (both directions)
 	* Implemented conversion of points of twisted Edwards to Montomery curves

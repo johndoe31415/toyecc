@@ -21,25 +21,15 @@
 #	Johannes Bauer <JohannesBauer@gmx.de>
 #
 
+class DuplicateCurveException(Exception):
+	pass
 
-from .PubKeyOps import PubKeyOpECDSAVerify, PubKeyOpECDSAExploitReusedNonce, PubKeyOpEDDSAVerify, PubKeyOpEDDSAEncode, PubKeyOpECIESEncrypt, PubKeyOpLoad
+class NoSuchCurveException(Exception):
+	pass
 
-class ECPublicKey(PubKeyOpECDSAVerify, PubKeyOpECDSAExploitReusedNonce, PubKeyOpEDDSAVerify, PubKeyOpEDDSAEncode, PubKeyOpECIESEncrypt, PubKeyOpLoad):
-	"""Elliptic curve public key abstraction. An EC public key is just a point
-	on the curve, which is why the constructor only takes this (public) point
-	as a parameter. The public key abstraction allows this point to be used in
-	various meaningful purposes (ECDSA signature verification, etc.)."""
+class UnsupportedPointFormatException(Exception):
+	pass
 
-	def __init__(self, point):
-		self._point = point
+class UnsupportedFieldException(Exception):
+	pass
 
-	@property
-	def curve(self):
-		return self._point.curve
-
-	@property
-	def point(self):
-		return self._point
-
-	def __str__(self):
-		return "PublicKey<%s>" % (str(self.point))

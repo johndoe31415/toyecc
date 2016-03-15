@@ -27,6 +27,9 @@ from .FieldElement import FieldElement
 from .AffineCurvePoint import AffineCurvePoint
 from .Random import secure_rand_int_between
 from . import Tools
+from .PrivKeyOps import PrivKeyOpLoad
+from .ASN1 import parse_asn1_public_key
+from .CurveDB import CurveDB
 
 class PubKeyOpECDSAExploitReusedNonce(object):
 	def ecdsa_exploit_reused_nonce(self, msg1, sig1, msg2, sig2):
@@ -136,3 +139,24 @@ class PubKeyOpECIESEncrypt(object):
 		# Return the publicly transmitted R and the symmetric key S
 		return { "R": R, "S": S }
 
+
+class PubKeyOpLoad(object):
+	@classmethod
+	def load_derdata(cls, derdata):
+		"""Loads an EC public key from a DER-encoded ASN.1 bytes object."""
+		asn1 = parse_asn1_public_key(derdata)
+		curve = CurveDB().get_curve_from_asn1(asn1["algorithm"]["parameters"])
+		point = AffineCurvePoint.deserialize_uncompressed(Tools.bits_to_bytes(asn1["subjectPublicKey"]), curve)
+		return cls(point)
+
+	@classmethod
+	def load_pem(cls, pemfilename):
+		"""Loads an EC public key from a PEM-encoded 'PUBLIC KEY' file."""
+		return cls.load_derdata(Tools.load_pem_data(pemfilename, "PUBLIC KEY"))
+
+	@classmethod
+	def load_der(cls, derfilename):
+		"""Loads an EC public key from a DER-encoded ASN.1 file."""
+		with open(derfilename, "rb") as f:
+			data = f.read()
+			return cls.load_derdata(data)

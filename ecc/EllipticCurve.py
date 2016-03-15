@@ -27,6 +27,11 @@ from .AffineCurvePoint import AffineCurvePoint
 class EllipticCurve(object):
 	"""Elliptic curve base class. Provides functionality which all curves have
 	in common."""
+	def __init__(self, **kwargs):
+		if "quirks" in kwargs:
+			self._quirks = { quirk.identifier: quirk for quirk in kwargs["quirks"] }
+		else:
+			self._quirks = { }
 
 	@property
 	def curve_order(self):
@@ -124,6 +129,22 @@ class EllipticCurve(object):
 		"""Returns the uncompressed representation of a point on the curve. Not
 		all curves may support this operation."""
 		raise Exception(NotImplemented)
+
+	def has_quirk(self, quirk_class):
+		"""Some elliptic curves may have quirks or tweaks for certain
+		algorithms. These are attached to the curve using the 'quirks' kwarg of
+		the constructor.  Code that wants to query if a specific quirk is
+		present may do so by calling 'has_quirk' with the according quirk class
+		(not a quirk class instance!)."""
+		return quirk_class.identifier in self._quirks
+
+	def get_quirk(self, quirk_class):
+		"""If a quirk is present for a given elliptic curve, this quirk may
+		have been parametrized during instanciation. The get_quirk() method
+		returns that quirk instance when given a specific quirk class as input.
+		It raises a KeyError if the requested quirk is not present for the
+		elliptic curve."""
+		return self._quirks[quirk_class.identifier]
 
 	def __eq__(self, other):
 		return self.domainparams == other.domainparams

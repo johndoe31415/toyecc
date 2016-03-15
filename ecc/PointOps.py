@@ -23,6 +23,7 @@
 
 from . import Tools
 from .FieldElement import FieldElement
+from .Exceptions import UnsupportedPointFormatException
 
 class PointOpEDDSAEncoding(object):
 	def eddsa_encode(self):
@@ -147,4 +148,29 @@ class PointOpNaiveOrderCalculation(object):
 			order += 1
 			curpt += self
 		return order
+
+
+class PointOpSerialization(object):
+	def serialize_uncompressed(self):
+		"""Serializes the point into a bytes object in uncompressed form."""
+		length = (self.curve.p.bit_length() + 7) // 8
+		serialized = bytes([ 0x04 ]) + Tools.inttobytes(int(self.x), length) + Tools.inttobytes(int(self.y), length)
+		return serialized
+
+	@classmethod
+	def deserialize_uncompressed(cls, data, curve = None):
+		"""Deserializes a curve point which is given in uncompressed form. A
+		curve may be passed with the 'curve' argument in which case an
+		AffineCurvePoint is returned from this method. Otherwise the affine X
+		and Y coordinates are returned as a tuple."""
+		if data[0] != 0x04:
+			raise UnsupportedPointFormatException("Generator point of explicitly encoded curve is given in unsupported form (0x%x)." % (data[0]))
+		data = data[1:]
+		assert((len(data) % 2) == 0)
+		Px = Tools.bytestoint(data[ : len(data) // 2])
+		Py = Tools.bytestoint(data[len(data) // 2 : ])
+		if curve is not None:
+			return cls(Px, Py, curve)
+		else:
+			return (Px, Py)
 

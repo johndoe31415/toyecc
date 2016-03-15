@@ -21,12 +21,18 @@
 #	Johannes Bauer <JohannesBauer@gmx.de>
 #
 
+import enum
 import collections
 from .ShortWeierstrassCurve import ShortWeierstrassCurve
 from .MontgomeryCurve import MontgomeryCurve
 from .TwistedEdwardsCurve import TwistedEdwardsCurve
 from .Singleton import singleton
 from .FieldElement import FieldElement
+from .Exceptions import DuplicateCurveException, NoSuchCurveException, UnsupportedFieldException
+from .ASN1 import parse_asn1_field_params_fp
+from .AffineCurvePoint import AffineCurvePoint
+from .CurveQuirks import CurveQuirkEdDSASetPrivateKeyMSB, CurveQuirkEdDSAEnsurePrimeOrderSubgroup
+from . import Tools
 
 @singleton
 class CurveDB(object):
@@ -38,7 +44,7 @@ class CurveDB(object):
 	def _checknames(self, curvenames):
 		if len(curvenames & self._taken_names) > 0:
 			taken_names = ", ".join(sorted(list(curvenames & self._taken_names)))
-			raise Exception("Curve(s) named %s already registered in curve DB." % (taken_names))
+			raise DuplicateCurveException("Curve(s) named %s already registered in curve DB." % (taken_names))
 
 	def register(self, entry):
 		"""Registers a curve in the curve database."""
@@ -78,11 +84,49 @@ class CurveDB(object):
 			raise KeyError("Curve named '%s' is not known in curve database." % (name))
 		return self._entries[name]
 
+	def get_curve_from_asn1(self, asn1):
+		"""This function will take a parsed ASN.1 ECParameters class as input
+		and try to return the curve specified within. If the ECParameters
+		specify a named curve by its's OID then a lookup is performed against
+		the curve database and that named curve returned on success if
+		non-ambiguous. If the parameters are exclicitly stated, then an unnamed
+		ShortWeierstrassCurve is constructed."""
+
+		if asn1["namedCurve"] is not None:
+			# Curve is encoded as OID, look up from curve DB
+			curve_oid = str(asn1["namedCurve"])
+			entries = [ entry for entry in self if (entry.oid == curve_oid) ]
+			if len(entries) == 0:
+				raise NoSuchCurveException("Trying to load curve with OID %s from curve DB, but no such curve is present in database." % (curve_oid))
+			elif len(entries) > 1:
+				raise Exception("Trying to load curve with OID %s from curve DB, but found %d curves (refuse to guess in the face of ambiguity)." % (curve_oid, len(entries)))
+			curve = entries[0]()
+		elif asn1["specifiedCurve"] is not None:
+			field_type_oid = str(asn1["specifiedCurve"]["fieldID"]["fieldType"])
+			if field_type_oid == "1.2.840.10045.1.1":
+				# F_P curve is encoded in explicit form
+				p = int(parse_asn1_field_params_fp(asn1["specifiedCurve"]["fieldID"]["parameters"]))
+				a = Tools.bytestoint(asn1["specifiedCurve"]["curve"]["a"])
+				b = Tools.bytestoint(asn1["specifiedCurve"]["curve"]["b"])
+				G = bytes(asn1["specifiedCurve"]["base"])
+				(Gx, Gy) = AffineCurvePoint.deserialize_uncompressed(G)
+				n = int(asn1["specifiedCurve"]["order"])
+				h = int(asn1["specifiedCurve"]["cofactor"])
+				curve = ShortWeierstrassCurve(p = p, a = a, b = b, n = n, h = h, Gx = Gx, Gy = Gy)
+			else:
+				# Maybe F_2^N curve or some other, unsupported type
+				raise UnsupportedFieldException("Only supports elliptic curves in F_P are supported, but the requested field type OID was %s." % (field_type_oid))
+		else:
+			raise NoSuchCurveException("Cannot load implicit curve.")
+		return curve
+
 	def __iter__(self):
+		"""Iterates over the curve DB entries."""
 		for name in self.curvenames():
 			yield self._entries[name.lower()]
 
 	def __getitem__(self, name):
+		"""Returns a curve (not a curve DB entry) by its name."""
 		return self.getentry(name)()
 
 	def __str__(self):
@@ -91,7 +135,7 @@ class CurveDB(object):
 
 class _CurveDBEntry(object):
 	def __init__(self, primary_name, curve_class, domain_params, **kwargs):
-		allowed_kwargs = set(("oid", "alt_oids", "aliases", "origin", "secure"))
+		allowed_kwargs = set(("oid", "alt_oids", "aliases", "origin", "secure", "quirks"))
 		wrong_args = kwargs.keys() - allowed_kwargs
 		if len(wrong_args) > 0:
 			raise Exception("Illegal keyword arguments: %s" % (", ".join(sorted(wrong_args))))
@@ -106,6 +150,7 @@ class _CurveDBEntry(object):
 		self._aliases = kwargs.get("aliases")
 		self._origin = kwargs.get("origin")
 		self._secure = kwargs.get("secure", True)
+		self._quirks = kwargs.get("quirks", [ ])
 		self._instance = None
 
 	def clone(self, secondary_name = None):
@@ -187,9 +232,9 @@ class _CurveDBEntry(object):
 	@property
 	def domain_params(self):
 		if self._instance is None:
-			return self._domain_params.items()
+			return dict(self._domain_params)
 		else:
-			return self._instance.domainparamdict.items()
+			return self._instance.domainparamdict
 
 	@property
 	def prettytitle(self):
@@ -203,7 +248,7 @@ class _CurveDBEntry(object):
 			print("OID    : %s" % (self._oid))
 		if domain:
 			print("Domain parameters:")
-			for (key, value) in sorted(self.domain_params):
+			for (key, value) in sorted(self.domain_params.items()):
 				if isinstance(value, FieldElement):
 					value = value.sigint()
 				print("    %-10s %s" % (key, value))
@@ -214,6 +259,7 @@ class _CurveDBEntry(object):
 			# Instanciate actual curve
 			params = self._domain_params
 			params["name"] = self.name
+			params["quirks"] = self._quirks
 			self._instance = self._curve_class(**params)
 		return self._instance
 
@@ -602,7 +648,7 @@ cdb.register(_CurveDBEntry("Ed25519", TwistedEdwardsCurve, {
 	"h": 8,
 	"Gx": 0x216936d3cd6e53fec0a4e231fdd6dc5c692cc7609525a7b2c9562d608f25d51a,
 	"Gy": 0x6666666666666666666666666666666666666666666666666666666666666658,
-}, origin = "2011 Bernstein-Duif-Lange-Schwabe-Yang"))
+}, origin = "2011 Bernstein-Duif-Lange-Schwabe-Yang", quirks = [ CurveQuirkEdDSASetPrivateKeyMSB(), CurveQuirkEdDSAEnsurePrimeOrderSubgroup() ]))
 
 # Curve imported from SafeCurves http://safecurves.cr.yp.to
 cdb.register(_CurveDBEntry("Anomalous", ShortWeierstrassCurve, {
@@ -746,6 +792,16 @@ cdb.register(_CurveDBEntry("E-521", TwistedEdwardsCurve, {
 	"Gx":  0x752cb45c48648b189df90cb2296b2878a3bfd9f42fc6c818ec8bf3c9c0c6203913f6ecc5ccc72434b1ae949d568fc99c6059d0fb13364838aa302a940a2f19ba6c,
 	"Gy": 12,
 }, origin = "2013 Bernstein-Lange / 2013 Hamburg / 2013 Aranha-Barreto-Pereira-Ricardini"))
+
+cdb.register(_CurveDBEntry("rigol", ShortWeierstrassCurve, {
+	"a": 0x2982,
+	"b": 0x3408,
+	"p": 0xaebf94cee3e707,
+	"n": 0xaebf94d5c6aa71,
+	"h": 1,
+	"Gx": 0x7a3e808599a525,
+	"Gy": 0x28be7fafd2a052,
+}, origin = "Rigol DS2xxx feature activation curve"))
 
 def getcurvedb():
 	"""Returns an instance of the curve database singleton object."""

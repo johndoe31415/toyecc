@@ -22,6 +22,7 @@
 #
 
 def secure_rand(length):
+	"""Returns a secure random bytes() object of the length 'length' bytes."""
 	f = open("/dev/urandom", "rb")
 	data = f.read(length)
 	assert(len(data) == length)

@@ -27,7 +27,11 @@ import collections
 from .FieldElement import FieldElement
 from .Random import secure_rand, secure_rand_int_between
 from .AffineCurvePoint import AffineCurvePoint
+from .CurveDB import CurveDB
+from .ShortWeierstrassCurve import ShortWeierstrassCurve
+from .ASN1 import parse_asn1_private_key, parse_asn1_field_params_fp
 from . import Tools
+from .CurveQuirks import CurveQuirkEdDSASetPrivateKeyMSB, CurveQuirkEdDSAEnsurePrimeOrderSubgroup
 
 class PrivKeyOpECDSASign(object):
 	ECDSASignature = collections.namedtuple("ECDSASignature", [ "hashalg", "r", "s" ])
@@ -174,12 +178,21 @@ class PrivKeyOpEDDSAKeyGen(object):
 		# And generate scalar from hash over seed
 		a = PrivKeyOpEDDSAKeyGen.__eddsa_bitstring(h, curve.p.bit_length())
 
-		# Conditioning may occur for some curves. Detect this by name for now.
-		# TODO: Find a better way, this is pretty screwed up.
-		if curve.name == "Ed25519":
-			# Condition lower three bits to be cleared and bit 254 to be set
-			a &= 0x3ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff8
-			a |= 0x4000000000000000000000000000000000000000000000000000000000000000
+		# Do we need to mask out lower significant bits to ensure that we use a
+		# prime order subgroup?
+		if curve.has_quirk(CurveQuirkEdDSAEnsurePrimeOrderSubgroup):
+			if not Tools.is_power_of_two(curve.h):
+				raise Exception("Can only ensure prime order subgroup by masking 'a' when curve cofactor is a power of two, h = %d isn't." % (curve.h))
+			a &= ~(curve.h - 1)
+
+		# Is the MSB of the curve always set to ensure constant runtime of the
+		# Montgomery ladder?
+		if curve.has_quirk(CurveQuirkEdDSASetPrivateKeyMSB):
+			# TODO: Clarify if we need to set bit at (bitlen(p) - 1) or
+			# (bitlen(n) + 1) -- for Ed25519 this unfortunately in both cases
+			# is 254.
+			bit = curve.n.bit_length() + 1
+			a |= (1 << bit)
 
 		privkey = cls(a, curve)
 		privkey.set_seed(seed)
@@ -196,9 +209,33 @@ class PrivKeyOpEDDSAEncode(object):
 		"""Performs decoding of a serialized private key as it is used for EdDSA."""
 		return cls.eddsa_generate(curve, encoded_privkey)
 
+
 class PrivKeyOpECDH(object):
 	def ecdh_compute(self, peer_pubkey):
 		"""Compute the shared secret point using our own private key and the
 		public key of our peer."""
 		return self.scalar * peer_pubkey.point
+
+
+class PrivKeyOpLoad(object):
+	@classmethod
+	def load_derdata(cls, derdata):
+		"""Loads an EC private key from a DER-encoded ASN.1 bytes object."""
+		asn1 = parse_asn1_private_key(derdata)
+		private_key_scalar = Tools.bytestoint(asn1["privateKey"])
+		curve = CurveDB().get_curve_from_asn1(asn1["parameters"])
+		return cls(private_key_scalar, curve)
+
+	@classmethod
+	def load_pem(cls, pemfilename):
+		"""Loads an EC private key from a PEM-encoded 'EC PRIVATE KEY' file."""
+		return cls.load_derdata(Tools.load_pem_data(pemfilename, "EC PRIVATE KEY"))
+
+	@classmethod
+	def load_der(cls, derfilename):
+		"""Loads an EC private key from a DER-encoded ASN.1 file."""
+		with open(derfilename, "rb") as f:
+			data = f.read()
+			return cls.load_derdata(data)
+
 
