@@ -26,10 +26,11 @@ from .FieldElement import FieldElement
 from .AffineCurvePoint import AffineCurvePoint
 from .EllipticCurve import EllipticCurve
 from .DocInherit import doc_inherit
+from .CurveOps import CurveOpIsomorphism, CurveOpExportSage
 
 _ShortWeierstrassCurveDomainParameters = collections.namedtuple("ShortWeierstrassCurveDomainParameters", [ "curvetype", "a", "b", "p", "n", "h", "G" ])
 
-class ShortWeierstrassCurve(EllipticCurve):
+class ShortWeierstrassCurve(EllipticCurve, CurveOpIsomorphism, CurveOpExportSage):
 	"""Represents an elliptic curve over a finite field F_P that satisfies the
 	short Weierstrass equation y^2 = x^3 + ax + b."""
 	pretty_name = "Short Weierstrass"

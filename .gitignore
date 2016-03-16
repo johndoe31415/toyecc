@@ -2,3 +2,4 @@ __pycache__
 .gitignore
 .*.swp
 .runtests.txt
+testdata/sage/*.py

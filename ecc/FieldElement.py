@@ -141,6 +141,17 @@ class FieldElement(object):
 		else:
 			return (-root, root)
 
+	def sqrt4(self):
+		"""Returns the quartic root of the value or None if no such value
+		explicitly exists mod p."""
+		root = self.sqrt()
+		if root is not None:
+			r1 = root[0].sqrt() or list()
+			r2 = root[1].sqrt() or list()
+			for candidate in list(r1) + list(r2):
+				if (candidate ** 4) == self:
+					return candidate
+
 	def __checktype(self, value):
 		if isinstance(value, int):
 			return value
