@@ -52,3 +52,20 @@ class TwistTests(unittest.TestCase):
 			self.assertTrue(twist.is_isomorphous_curve(known_twist_2))
 			self.assertTrue(twist.is_isomorphous_curve(known_twist_3))
 
+	def test_twist_n_h(self):
+		# Cofactor taken from https://safecurves.cr.yp.to/twist.html
+		curve = getcurvebyname("brainpoolP256t1")
+		twist = curve.twist()
+
+		t = curve.p + 1 - curve.curve_order
+		twist_curve_order = curve.p + 1 + t
+
+		h = 5**2 * 175939 * 492167257 * 8062915307 * 2590895598527 * 4233394996199
+		n = twist_curve_order // h
+		assert((twist_curve_order % h) == 0)
+	
+		
+		full_twist = ShortWeierstrassCurve(a = int(twist.a), b = int(twist.b), p = twist.p, n = n, h = h, Gx = int(twist.G.x), Gy = int(twist.G.y), field_extension = twist.field_extension)
+#		print(full_twist)
+		print(twist.G * 2)
+
