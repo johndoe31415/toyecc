@@ -222,7 +222,7 @@ def action_getpubkey(cmd, args):
 	privkey = SignifyPrivateKey.fromfile(args.privkeyfile)
 	privkey.getpubkey().writetofile(args.pubkeyfile)
 
-mc = MultiCommand()
+mc = MultiCommand(help = "pysignify: Python example to create EdDSA signatures on basis of Ed25519 which are used for the 'signify' signatures which are popular in the OpenBSD world. It should be fully compatible to the signature format used by the BSD signify.")
 
 def genparser(parser):
 	parser.add_argument("-p", "--pubkeyfile", metavar = "filename", type = str, required = True, help = "File in which the public key is stored. Mandatory argument.")

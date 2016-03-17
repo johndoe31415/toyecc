@@ -24,6 +24,7 @@
 #	File UUID 4c6b89d0-ec0c-4b19-80d1-4daba7d80967
 
 import sys
+import textwrap
 import collections
 
 from FriendlyArgumentParser import FriendlyArgumentParser
@@ -33,7 +34,8 @@ class MultiCommand(object):
 	RegisteredCommand = collections.namedtuple("RegisteredCommand", [ "name", "description", "parsergenerator", "action", "aliases" ])
 	ParseResult = collections.namedtuple("ParseResults", [ "cmd", "args" ])
 
-	def __init__(self):
+	def __init__(self, help = None):
+		self._help = help
 		self._commands = { }
 		self._aliases = { }
 		self._cmdorder = [ ]
@@ -60,6 +62,11 @@ class MultiCommand(object):
 	def _show_syntax(self, msg = None):
 		if msg is not None:
 			print("Error: %s" % (msg), file = sys.stderr)
+		if self._help is not None:
+			print()
+			for line in textwrap.wrap(self._help):
+				print(line)
+			print()
 		print("Syntax: %s [command] [options]" % (sys.argv[0]), file = sys.stderr)
 		print(file = sys.stderr)
 		print("Available commands:", file = sys.stderr)
