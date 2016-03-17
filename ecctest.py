@@ -66,8 +66,12 @@ print("s:", signature.s)
 separator()
 
 print("Verification of signature")
-print("Original message:", privatekey.pubkey.ecdsa_verify(b"foobar", signature))
-print("Modified message:", privatekey.pubkey.ecdsa_verify(b"foobaz", signature))
+verify_original = privatekey.pubkey.ecdsa_verify(b"foobar", signature)
+verify_modified = privatekey.pubkey.ecdsa_verify(b"foobaz", signature)
+print("Original message: %s (should be True)" % (verify_original))
+print("Modified message: %s (should be False)" % (verify_modified))
+assert(verify_original)
+assert(not verify_modified)
 separator()
 
 
@@ -95,7 +99,9 @@ if points:
 	(pt1, pt2) = points
 	print("Point 1:", pt1)
 	print("Point 2:", pt2)
-	print("On curve?", pt1.oncurve(), pt2.oncurve())
+	print("On curve? %s/%s (should be True/True)" % (pt1.oncurve(), pt2.oncurve()))
+	assert(pt1.oncurve())
+	assert(pt2.oncurve())
 else:
 	print("No point found")
 separator()
@@ -103,7 +109,7 @@ separator()
 
 ########################### Generating tiny curve for example purposes ###########################
 print("Generating a tiny curve")
-tinycurve = ShortWeierstrassCurve.ShortWeierstrassCurve(
+tinycurve = ShortWeierstrassCurve(
 	2, 			# A
 	3,	 		# B
 	263, 		# p
