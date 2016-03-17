@@ -141,7 +141,7 @@ class FieldElement(object):
 		else:
 			return (-root, root)
 
-	def sqrt4(self):
+	def quartic_root(self):
 		"""Returns the quartic root of the value or None if no such value
 		explicitly exists mod p."""
 		root = self.sqrt()
@@ -170,6 +170,15 @@ class FieldElement(object):
 			return -neg
 		else:
 			return int(self)
+
+	@classmethod
+	def any_qnr(cls, modulus):
+		"""Returns any quadratic non-residue in F(modulus)."""
+		for i in range(1000):
+			candidate = cls(random.randint(2, modulus - 1), modulus)
+			if candidate.is_qnr:
+				return candidate
+		raise Exception("Could not find a QNR in F_%d with a reasonable amount of tries." % (modulus))
 
 	def __int__(self):
 		return self._intvalue

@@ -22,37 +22,91 @@
 #
 
 from .FieldElement import FieldElement
+from .Exceptions import NoSuchCurveException
 
 class CurveOpIsomorphism(object):
-	def isomorphism(self, u):
-		"""Returns a isomorphous curve by applying the transformation x -> u²x
-		and y -> u³y."""
+	def _twist(self, d = None, sqrt_d = None):
+		"""Returns the twisted curve with the twist coefficient d. If d is a
+		quadratic non-residue mod p then this function will yield a curve that
+		is isomorphous on the field extension GF(sqrt(d)). If it is a quadratic
+		residue, it will return an GF(p)-isomorphous curve."""
 		assert(self.curvetype == "shortweierstrass")
 		ShortWeierstrassCurve = self.__class__
-		if u == 0:
-			raise Exception("Domain error: u must be nonzero.")
 
-		u = FieldElement(u, self.p)
-		a = self.a * (u ** 4)
-		b = self.b * (u ** 6)
-		if self.hasgenerator:
-			Gx = int(self.G.x * (u ** 2))
-			Gy = int(self.G.y * (u ** 3))
+		if sqrt_d is not None:
+			# If a square root is given, then it must be a correct square root
+			assert(sqrt_d ** 2 == d)
+
+		a = self.a * (d ** 2)
+		b = self.b * (d ** 3)
+		if d.is_qr and self.hasgenerator:
+			# Quadratic twist will return an GF(p)-isomorphous curve -> convert
+			# generator point as well
+			if sqrt_d is None:
+				sqrt_d = d.sqrt()[0]
+			Gx = int(self.G.x * d)
+			Gy = int(self.G.y * (sqrt_d ** 3))
+			field_extension = None
 		else:
+			# Quadratic twist will return an isomorphous curve on the
+			# GF(sqrt(d)) field extension -> no generator point conversion for
+			# now
 			Gx = None
 			Gy = None
+			field_extension = d
+#			Gx = int(self.G.x * d)
+#			Gy = int(self.G.y * d)
 		return ShortWeierstrassCurve(a = int(a), b = int(b), p = self.p, n = self.n, h = self.h, Gx = Gx, Gy = Gy)
 
-	def isomorphism_fixed_a(self, a):
-		"""Tries to find an isomorphous curve which has a particular value for
-		the curve coefficient a."""
+	def twist(self, d = None):
+		"""If the twist coefficient d is omitted, the function will
+		automatically look for an arbitrary quadratic non-residue in F_P."""
+		if d == 0:
+			raise Exception("Domain error: d must be nonzero.")
+		elif d is None:
+			# Search for a QNR in F_P
+			d = FieldElement.any_qnr(self.p)
+		else:
+			d = FieldElement(d, self.p)
+			if d.is_qr:
+				raise Exception("Twist requested, but twist coefficient d is a quadratic-residue mod p. Refusing to return a GF(p)-isomorphic curve; if you want this behavior, use twist_fp_isomorphic()")
+		return self._twist(d)
 
-		# anew = a * u^4 -> u = sqrt4(anew / a)
+	def twist_fp_isomorphic(self, u):
+		"""Returns a GF(p)-isomorphous curve by applying the substituting
+		transformation x = u^2 x' and y = u^3 y' on the curve equation. The
+		function therefore returns a quadratic twist with d = u^2, i.e. it
+		ensures that the twist coefficient d is a quadratic residue mod p.."""
+		if u == 0:
+			raise Exception("Domain error: u must be nonzero.")
+		return self._twist(FieldElement(u ** 2, self.p), FieldElement(u, self.p))
+
+	def twist_fp_isomorphic_fixed_a(self, a):
+		"""Tries to find an GF(p)-isomorphous curve which has a particular
+		given value for the curve coefficient 'a'."""
+
+		# anew = a * u^4 -> u = quartic_root(anew / a)
 		scalar = a // self.a
-		u = scalar.sqrt4()
+		u = scalar.quartic_root()
 		if u is None:
-			raise Exception("Cannot find an isomorphism so that a = %d because %s has no quartic root in F_P" % (a, scalar))
-		return self.isomorphism(int(u))
+			raise NoSuchCurveException("Cannot find an isomorphism so that a = %d because %s has no quartic root in F_P" % (a, scalar))
+		return self.twist_fp_isomorphic(int(u))
+
+	def is_isomorphous_curve(self, other):
+		"""Returns if the given curve 'other' is isomorphous in the same field
+		as the given curve curve."""
+		if other.p != self.p:
+			return False
+
+		try:
+			iso = self.twist_fp_isomorphic_fixed_a(other.a)
+		except NoSuchCurveException:
+			# No isomorphous curve with this value for a exists
+			return False
+
+		# The curves should be identical after the transformation if they're
+		# isomorphous to each other
+		return (iso.a == other.a) and (iso.b == other.b)
 
 class CurveOpExportSage(object):
 	def export_sage(self, varname = "curve"):
@@ -75,3 +129,4 @@ class CurveOpExportSage(object):
 			raise Exception(NotImplemented)
 
 		return statements
+

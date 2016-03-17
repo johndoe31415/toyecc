@@ -37,3 +37,4 @@ from .CurveQuirkTests import CurveQuirkTests
 from .PolyTests import PolyTests
 from .DivPolyTests import DivPolyTests
 from .CRTTests import CRTTests
+from .TwistTests import TwistTests

@@ -72,9 +72,10 @@ class EllipticCurve(object):
 
 	@property
 	def curve_order(self):
-		"""Returns the order of the curve, i.e. #E(F_p). Intuitively, this is
-		the total number of points on the curve (plus maybe points at ininity,
-		depending on the curve type) that satisfy the curve equation."""
+		"""Returns the order of the curve in the underlying field, i.e.
+		#E(F_p). Intuitively, this is the total number of points on the curve
+		(plus maybe points at ininity, depending on the curve type) that
+		satisfy the curve equation."""
 		if (self.h is None) or (self.n is None):
 			raise Exception("#E(F_p) is unknown for this curve")
 		return self.h * self.n

@@ -21,9 +21,11 @@ Summary of changes from v0.06 to v0.07 (2016-xx-xx)
 	* Inheritance of docstrings via intoduction of doc_inherit() decorator
 	* Added method for retrieving the j-invariant of a ShortWeierstrassCurve
 	and a method to detect if a curve is anomaleous.
-	* Simple isomorphous curve calculation for short Weierstrass curves by
-	substitution of (x, y) by (x^2, y^3) and calculation of isomorphous curves
-	with a predefined domain parameter coefficient a
+	* Calculation of quatratic twists of curves, either returning
+	GF(p)-isomorphous curves if a twist coefficient d is given which is a
+	quadratic residue mod or returning a curve which is isomorphous on the
+	field extension GF(sqrt(d)). Also calculation of isomorphous curves with
+	fixed values for the curve coefficient a.
 
 Summary of changes from v0.05 to v0.06 (2016-03-01)
 ===================================================
