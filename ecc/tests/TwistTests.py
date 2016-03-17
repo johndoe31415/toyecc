@@ -43,9 +43,9 @@ class TwistTests(unittest.TestCase):
 		curve = getcurvebyname("secp112r1")
 
 		# Known twists as calculated by SAGE
-		known_twist_1 = ShortWeierstrassCurve.init_rawcurve(0xa6fd184bb33a605361d692c0847d, 0x8cc213474426835665f6814abac1, curve.p)
-		known_twist_2 = ShortWeierstrassCurve.init_rawcurve(0x1d18972a37f1746e92a1083a31fc, 0x395862918bf1a0fdff444ea0a8be, curve.p)
-		known_twist_3 = ShortWeierstrassCurve.init_rawcurve(0x2a0b265cc68e756c04317c260af1, 0x9457ee33ea0aceb330ab19a8b7a3, curve.p)
+		known_twist_1 = ShortWeierstrassCurve.init_rawcurve(0xdb7c2abf62e35e668076bead1bdb, 0xd6ce5ea491322bfe05c0d7022be3, curve.p, field_extension = 20)
+		known_twist_2 = ShortWeierstrassCurve.init_rawcurve(0xdb7c2abf62e35e668076bead19cb, 0x684a8c3bd69e6065510ec0eb9900, curve.p, field_extension = 24)
+		known_twist_3 = ShortWeierstrassCurve.init_rawcurve(0xdb7c2abf62e35e668076bead148b, 0x6d03b63b43341ad58bb247c1729f, curve.p, field_extension = 32)
 		for i in range(10):
 			twist = curve.twist()
 			self.assertTrue(twist.is_isomorphous_curve(known_twist_1))

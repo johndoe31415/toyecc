@@ -46,17 +46,26 @@ class CurveOpIsomorphism(object):
 				sqrt_d = d.sqrt()[0]
 			Gx = int(self.G.x * d)
 			Gy = int(self.G.y * (sqrt_d ** 3))
-			field_extension = None
+			field_extension = self.field_extension
+			
+			n = self.n
+			h = self.h
 		else:
 			# Quadratic twist will return an isomorphous curve on the
 			# GF(sqrt(d)) field extension -> no generator point conversion for
 			# now
-			Gx = None
-			Gy = None
-			field_extension = d
-#			Gx = int(self.G.x * d)
-#			Gy = int(self.G.y * d)
-		return ShortWeierstrassCurve(a = int(a), b = int(b), p = self.p, n = self.n, h = self.h, Gx = Gx, Gy = Gy)
+			Gx = int(self.G.x * d)
+			Gy = int(self.G.y * d)
+			field_extension = int(d)
+
+			# If the original curve had q + 1 - t points, then its twist will
+			# have q + 1 + t points. TODO: Does this help us to find the order
+			# of the generator point G? I don't think it does :-( Leave n and h
+			# therefore unset for the moment.
+			n = None
+			h = None
+			
+		return ShortWeierstrassCurve(a = int(a), b = int(b), p = self.p, n = n, h = h, Gx = Gx, Gy = Gy, field_extension = field_extension)
 
 	def twist(self, d = None):
 		"""If the twist coefficient d is omitted, the function will
@@ -96,6 +105,9 @@ class CurveOpIsomorphism(object):
 		"""Returns if the given curve 'other' is isomorphous in the same field
 		as the given curve curve."""
 		if other.p != self.p:
+			return False
+
+		if other.on_field_extension != self.on_field_extension:
 			return False
 
 		try:
