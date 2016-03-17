@@ -31,16 +31,17 @@ curve = getcurvebyname("ed25519")
 
 if len(sys.argv) < 2:
 	keypair = ECPrivateKey.eddsa_generate(curve)
+	print("Generating keypair on the fly")
 else:
 	keypair = ECPrivateKey.loadkeypair(bytes.fromhex(sys.argv[1]))
 print("Keypair:", keypair)
 
 msg = b"Foobar!"
-print("Msg:", msg)
+print("Message:", msg)
 
 signature = keypair.eddsa_sign(msg)
-print("Sig:", signature)
+print("Signature:", signature)
 
-print("Verify:", keypair.pubkey.eddsa_verify(msg, signature))
-print("Verify wrong sig:", keypair.pubkey.eddsa_verify(msg + b"x", signature))
+print("Verify correct message: %s (should be True)" % (keypair.pubkey.eddsa_verify(msg, signature)))
+print("Verify forged message : %s (should be False)" % (keypair.pubkey.eddsa_verify(msg + b"x", signature)))
 
