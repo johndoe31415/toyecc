@@ -46,7 +46,6 @@ class CurveOpIsomorphism(object):
 				sqrt_d = d.sqrt()[0]
 			Gx = int(self.G.x * d)
 			Gy = int(self.G.y * (sqrt_d ** 3))
-			field_extension = self.field_extension
 			
 			n = self.n
 			h = self.h
@@ -54,9 +53,11 @@ class CurveOpIsomorphism(object):
 			# Quadratic twist will return an isomorphous curve on the
 			# GF(sqrt(d)) field extension -> no generator point conversion for
 			# now
-			Gx = int(self.G.x * d)
-			Gy = int(self.G.y * d)
-			field_extension = int(d)
+#			Gx = int(self.G.x * d)
+#			Gy = int(self.G.y * d)
+			Gx = None
+			Gy = None
+			
 
 			# If the original curve had q + 1 - t points, then its twist will
 			# have q + 1 + t points. TODO: Does this help us to find the order
@@ -65,7 +66,7 @@ class CurveOpIsomorphism(object):
 			n = None
 			h = None
 			
-		return ShortWeierstrassCurve(a = int(a), b = int(b), p = self.p, n = n, h = h, Gx = Gx, Gy = Gy, field_extension = field_extension)
+		return ShortWeierstrassCurve(a = int(a), b = int(b), p = self.p, n = n, h = h, Gx = Gx, Gy = Gy)
 
 	def twist(self, d = None):
 		"""If the twist coefficient d is omitted, the function will
@@ -105,9 +106,6 @@ class CurveOpIsomorphism(object):
 		"""Returns if the given curve 'other' is isomorphous in the same field
 		as the given curve curve."""
 		if other.p != self.p:
-			return False
-
-		if other.on_field_extension != self.on_field_extension:
 			return False
 
 		try:

@@ -28,7 +28,7 @@ from .EllipticCurve import EllipticCurve
 from .DocInherit import doc_inherit
 from .CurveOps import CurveOpIsomorphism, CurveOpExportSage
 
-_ShortWeierstrassCurveDomainParameters = collections.namedtuple("ShortWeierstrassCurveDomainParameters", [ "curvetype", "a", "b", "p", "n", "h", "G", "field_extension" ])
+_ShortWeierstrassCurveDomainParameters = collections.namedtuple("ShortWeierstrassCurveDomainParameters", [ "curvetype", "a", "b", "p", "n", "h", "G" ])
 
 class ShortWeierstrassCurve(EllipticCurve, CurveOpIsomorphism, CurveOpExportSage):
 	"""Represents an elliptic curve over a finite field F_P that satisfies the
@@ -46,8 +46,6 @@ class ShortWeierstrassCurve(EllipticCurve, CurveOpIsomorphism, CurveOpExportSage
 		self._a = FieldElement(a, p)
 		self._b = FieldElement(b, p)
 		self._name = kwargs.get("name")
-		self._field_extension = kwargs.get("field_extension", 1)
-		assert(isinstance(self._field_extension, int))
 
 		# Check that the curve is not singular
 		assert((4 * (self.a ** 3)) + (27 * (self.b ** 2)) != 0)
@@ -62,12 +60,12 @@ class ShortWeierstrassCurve(EllipticCurve, CurveOpIsomorphism, CurveOpExportSage
 				assert((self.n * self.G).is_neutral)
 
 	@classmethod
-	def init_rawcurve(cls, a, b, p, field_extension = 1):
+	def init_rawcurve(cls, a, b, p):
 		"""Returns a raw curve which has an undiscovered amount of points
 		#E(F_p) (i.e. the domain parameters n and h are not set). This function
 		can be used to create a curve which is later completed by counting
 		#E(F_p) using Schoof's algorithm."""
-		return cls(a = a, b = b, p = p, n = None, h = None, Gx = None, Gy = None, field_extension = field_extension)
+		return cls(a = a, b = b, p = p, n = None, h = None, Gx = None, Gy = None)
 
 	@property
 	def is_anomalous(self):
@@ -79,7 +77,7 @@ class ShortWeierstrassCurve(EllipticCurve, CurveOpIsomorphism, CurveOpExportSage
 	@property
 	@doc_inherit(EllipticCurve)
 	def domainparams(self):
-		return _ShortWeierstrassCurveDomainParameters(curvetype = self.curvetype, a = self.a, b = self.b, p = self.p, n = self.n, h = self.h, G = self.G, field_extension = self.field_extension)
+		return _ShortWeierstrassCurveDomainParameters(curvetype = self.curvetype, a = self.a, b = self.b, p = self.p, n = self.n, h = self.h, G = self.G)
 
 	@property
 	@doc_inherit(EllipticCurve)
@@ -105,26 +103,9 @@ class ShortWeierstrassCurve(EllipticCurve, CurveOpIsomorphism, CurveOpExportSage
 		return security_bits
 
 	@property
-	def on_field_extension(self):
-		"""Returns if the calculations for this curve are made on an extension
-		of the field, namely GF(sqrt(d)). If this is the case, then the Y
-		coordinates of all points are implicitly multiplied by sqrt(d) where d
-		is the twist coefficient."""
-		return self._field_extension != 1
-
-	@property
-	def field_extension(self):
-		"""Returns the twist coefficient d which defines the element of the
-		extension field GF(sqrt(d)). For non-extended fields this will return
-		1."""
-		return self._field_extension
-
-	@property
 	@doc_inherit(EllipticCurve)
 	def prettyname(self):
 		name = [ ]
-		if self.on_field_extension:
-			name.append("Twisted")
 		name.append(self.pretty_name)
 		if self.is_koblitz:
 			name.append("(Koblitz)")
@@ -159,7 +140,7 @@ class ShortWeierstrassCurve(EllipticCurve, CurveOpIsomorphism, CurveOpExportSage
 
 	@doc_inherit(EllipticCurve)
 	def oncurve(self, P):
-		return P.is_neutral or (self._field_extension * (P.y ** 2) == (P.x ** 3) + (self.a * P.x) + self.b)
+		return P.is_neutral or ((P.y ** 2) == (P.x ** 3) + (self.a * P.x) + self.b)
 
 	@doc_inherit(EllipticCurve)
 	def point_conjugate(self, P):
@@ -219,7 +200,4 @@ class ShortWeierstrassCurve(EllipticCurve, CurveOpIsomorphism, CurveOpExportSage
 		if self.hasname:
 			return "ShortWeierstrassCurve<%s>" % (self.name)
 		else:
-			if not self.on_field_extension:
-				return "ShortWeierstrassCurve<y^2 = x^3 + 0x%x x + 0x%x mod 0x%x>" % (int(self.a), int(self.b), int(self.p))
-			else:
-				return "ShortWeierstrassCurve<y^2 = x^3 + 0x%x x + 0x%x mod 0x%x extended by sqrt(0x%x)>" % (int(self.a), int(self.b), int(self.p), self.field_extension)
+			return "ShortWeierstrassCurve<y^2 = x^3 + 0x%x x + 0x%x mod 0x%x>" % (int(self.a), int(self.b), int(self.p))

@@ -59,9 +59,8 @@ class EllipticCurve(object):
 
 	@property
 	def h(self):
-		"""Returns the cofactor of the curve, i.e. h = #E(F_p) / n. This will
-		always be an integer according to Lagrange's Theorem, because n is the
-		order of a subgroup."""
+		"""Returns the cofactor of the generator subgroup, i.e. h = #E(F_p) /
+		n. This will always be an integer according to Lagrange's Theorem."""
 		return self._h
 
 	@property
@@ -79,6 +78,12 @@ class EllipticCurve(object):
 		if (self.h is None) or (self.n is None):
 			raise Exception("#E(F_p) is unknown for this curve")
 		return self.h * self.n
+
+	@property
+	def frobenius_trace(self):
+		"""Returns the Frobenius trace 't' of the curve. Since
+		#E(F_p) = p + 1	- t it follows that t = p + 1 - #E(F_p)."""
+		return self.p + 1 - self.curve_order
 
 	@property
 	def domainparams(self):

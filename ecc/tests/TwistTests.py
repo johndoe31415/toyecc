@@ -22,7 +22,7 @@
 #
 
 import unittest
-from .. import getcurvebyname, ShortWeierstrassCurve
+from .. import getcurvebyname, ShortWeierstrassCurve, AffineCurvePoint
 
 class TwistTests(unittest.TestCase):
 	def test_brainpool_gf_p_isomorphism(self):
@@ -43,9 +43,9 @@ class TwistTests(unittest.TestCase):
 		curve = getcurvebyname("secp112r1")
 
 		# Known twists as calculated by SAGE
-		known_twist_1 = ShortWeierstrassCurve.init_rawcurve(0xdb7c2abf62e35e668076bead1bdb, 0xd6ce5ea491322bfe05c0d7022be3, curve.p, field_extension = 20)
-		known_twist_2 = ShortWeierstrassCurve.init_rawcurve(0xdb7c2abf62e35e668076bead19cb, 0x684a8c3bd69e6065510ec0eb9900, curve.p, field_extension = 24)
-		known_twist_3 = ShortWeierstrassCurve.init_rawcurve(0xdb7c2abf62e35e668076bead148b, 0x6d03b63b43341ad58bb247c1729f, curve.p, field_extension = 32)
+		known_twist_1 = ShortWeierstrassCurve.init_rawcurve(0xdb7c2abf62e35e668076bead1bdb, 0xd6ce5ea491322bfe05c0d7022be3, curve.p)
+		known_twist_2 = ShortWeierstrassCurve.init_rawcurve(0xdb7c2abf62e35e668076bead19cb, 0x684a8c3bd69e6065510ec0eb9900, curve.p)
+		known_twist_3 = ShortWeierstrassCurve.init_rawcurve(0xdb7c2abf62e35e668076bead148b, 0x6d03b63b43341ad58bb247c1729f, curve.p)
 		for i in range(10):
 			twist = curve.twist()
 			self.assertTrue(twist.is_isomorphous_curve(known_twist_1))
@@ -57,15 +57,26 @@ class TwistTests(unittest.TestCase):
 		curve = getcurvebyname("brainpoolP256t1")
 		twist = curve.twist()
 
-		t = curve.p + 1 - curve.curve_order
-		twist_curve_order = curve.p + 1 + t
+		twist_curve_order = curve.p + 1 + curve.frobenius_trace
 
 		h = 5**2 * 175939 * 492167257 * 8062915307 * 2590895598527 * 4233394996199
 		n = twist_curve_order // h
 		assert((twist_curve_order % h) == 0)
 	
-		
-		full_twist = ShortWeierstrassCurve(a = int(twist.a), b = int(twist.b), p = twist.p, n = n, h = h, Gx = int(twist.G.x), Gy = int(twist.G.y), field_extension = twist.field_extension)
+		full_twist = ShortWeierstrassCurve(a = int(twist.a), b = int(twist.b), p = twist.p, n = n, h = h, Gx = int(twist.G.x), Gy = int(twist.G.y))
 #		print(full_twist)
 		print(twist.G * 2)
 
+	def test_twist_add(self):
+		curve = getcurvebyname("secp112r1").twist(32)
+		P1 = AffineCurvePoint(0x6229b962d45ca6852e375adc80e1, 0x1633adc1c8f0e611552278a24ada, curve)
+		P2 = AffineCurvePoint(0x89f14abd7ce333e5abf5fd25293f, 0x5637cb20fe3c2d12b965fd03e1a6, curve)
+		P3 = AffineCurvePoint(0xbd2fab84d3fef8f637ef1c341e00, 0x3bd95f46f30cccb31f4e4b6d6595, curve)
+	
+		self.assertTrue(P1.oncurve())
+		self.assertTrue(P2.oncurve())
+		self.assertTrue(P3.oncurve())
+		self.assertEqual(P1 + P1, P2)
+		self.assertEqual(P1 + P2, P3)
+
+	
