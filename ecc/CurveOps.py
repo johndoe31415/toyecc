@@ -46,7 +46,7 @@ class CurveOpIsomorphism(object):
 				sqrt_d = d.sqrt()[0]
 			Gx = int(self.G.x * d)
 			Gy = int(self.G.y * (sqrt_d ** 3))
-			
+
 			n = self.n
 			h = self.h
 		else:
@@ -57,7 +57,6 @@ class CurveOpIsomorphism(object):
 #			Gy = int(self.G.y * d)
 			Gx = None
 			Gy = None
-			
 
 			# If the original curve had q + 1 - t points, then its twist will
 			# have q + 1 + t points. TODO: Does this help us to find the order
@@ -65,7 +64,7 @@ class CurveOpIsomorphism(object):
 			# therefore unset for the moment.
 			n = None
 			h = None
-			
+
 		return ShortWeierstrassCurve(a = int(a), b = int(b), p = self.p, n = n, h = h, Gx = Gx, Gy = Gy)
 
 	def twist(self, d = None):
