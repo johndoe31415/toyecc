@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/johndoe31415/joeecc.svg?branch=master)](https://travis-ci.org/johndoe31415/joeecc)
+
 joeecc
 =======
 joeecc is a playground for Elliptic Curve Cryptography in F<sub>P</sub>. It is
