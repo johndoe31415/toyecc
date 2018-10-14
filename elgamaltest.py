@@ -22,10 +22,7 @@
 #	Johannes Bauer <JohannesBauer@gmx.de>
 #
 
-import sys
-
-from ecc import AffineCurvePoint, ShortWeierstrassCurve, getcurvebyname
-from ecc import ECPrivateKey
+from ecc import getcurvebyname, ECPrivateKey
 
 curve = getcurvebyname("secp521r1")
 
