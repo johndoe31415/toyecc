@@ -1,5 +1,3 @@
-[![Build Status](https://travis-ci.org/johndoe31415/joeecc.svg?branch=master)](https://travis-ci.org/johndoe31415/joeecc)
-
 joeecc
 =======
 joeecc is a playground for Elliptic Curve Cryptography in F<sub>P</sub>. It is
@@ -32,6 +30,7 @@ Features
   * ECDSA demonstration
   * ECIES demonstration
   * ECDH demonstration
+  * Elgamal demonstration
   * Demonstration how a private key can be recovered from two ECDSA signatures
     which reused the same nonce (ECDSA nonce exploit)
   * Support for short-formed Weierstrass curves, Montgomery curves and twisted
@@ -45,5 +44,3 @@ Features
   * Example of OpenBSD's signify application (generates and verifies Ed25519
     signatures, but doesn't support key encryption)
   * Clean, well-documented Python3 code
-
-
