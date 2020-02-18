@@ -640,6 +640,17 @@ cdb.register(_CurveDBEntry("Curve25519", MontgomeryCurve, {
 	"Gy": 0x5f51e65e475f794b1fe122d388b72eb36dc2b28192839e4dd6163a5d81312c14,
 }, origin = "2006 Bernstein"))
 
+cdb.register(_CurveDBEntry("Curve448", MontgomeryCurve, {
+	"a": 156326,
+	"b": 1,
+	"p": (2 ** 448) - (2 ** 224) - 1,
+	"n": (2 ** 446) - 0x8335dc163bb124b65129c96fde933d8d723a70aadc873d6d54a7bb0d,
+	"h": 8,
+	"Gx": 0x5,
+	"Gy": 0x7d235d1295f5b1f66c98ab6e58326fcecbae5d34f55545d060f75dc28df3f6edb8027e2346430d211312c4b150677af76fd7223d457b5b1a,
+}, origin = "2006 Bernstein"))
+
+
 cdb.register(_CurveDBEntry("Ed25519", TwistedEdwardsCurve, {
 	"a": -1,
 	"d": 37095705934669439343138083508754565189542113879843219016388785533085940283555,
