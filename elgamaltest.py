@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 #
 #	joeecc - A small Elliptic Curve Cryptography Demonstration.
-#	Copyright (C) 2011-2015 Johannes Bauer
+#	Copyright (C) 2011-2020 Johannes Bauer
 #
 #	This file is part of joeecc.
 #
@@ -22,6 +22,7 @@
 #	Johannes Bauer <JohannesBauer@gmx.de>
 #
 
+import os
 from ecc import getcurvebyname, ECPrivateKey
 
 curve = getcurvebyname("secp521r1")
@@ -34,13 +35,13 @@ def msg_to_point(curve, msg, msg_width_bits):
 		if point:
 			point = point[0]
 			break
-	return point
+	return (i + 1, point)
 
 def elgamal_encrypt(recipient_pubkey, msg, msg_width_bits):
 	k = ECPrivateKey.generate(curve)
 	C1 = k.pubkey.point
 	C2 = k.scalar * recipient_pubkey.point
-	P_m = msg_to_point(curve, msg, msg_width_bits = msg_width_bits)
+	(trials, P_m) = msg_to_point(curve, msg, msg_width_bits = msg_width_bits)
 	ciphertext = (C1, C2 + P_m)
 	return ciphertext
 
@@ -64,3 +65,7 @@ print("    C1 =", ciphertext[0])
 print("    C2 =", ciphertext[1])
 plaintext = elgamal_decrypt(privkey, ciphertext, msg_width_bits = 256)
 print("Plaintext:", plaintext)
+
+#for i in range(10000):
+#	msg = os.urandom(8)
+#	ciphertext = elgamal_encrypt(pubkey, msg, msg_width_bits = 256)
