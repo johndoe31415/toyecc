@@ -102,7 +102,11 @@ class PubKeyOpECDSAVerify(object):
 class PubKeyOpEDDSAVerify(object):
 	def eddsa_verify(self, message, signature):
 		"""Verify an EdDSA signature over a message."""
-		h = Tools.bytestoint_le(Tools.eddsa_hash(signature.R.eddsa_encode() + self.point.eddsa_encode() + message))
+		if self.curve.is_ed448:
+			hash_fnct = Tools.ed448_hash
+		else:
+			hash_fnct = Tools.eddsa_hash
+		h = Tools.bytestoint_le(hash_fnct(signature.R.eddsa_encode() + self.point.eddsa_encode() + message))
 		return (signature.s * self.curve.G) == signature.R + (h * self.point)
 
 

@@ -71,6 +71,11 @@ def eddsa_hash(data):
 	(SHA-512)."""
 	return hashlib.sha512(data).digest()
 
+def ed448_hash(data):
+	"""Returns the message digest over the data which is used for Ed448
+	(SHAKE-256)."""
+	return hashlib.shake_256(data).digest(114)
+
 def load_pem_data(filename, specifier):
 	"""Loads the PEM payload, designated with a BEGIN and END specifier, from a
 	file given by its filename."""

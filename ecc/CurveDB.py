@@ -780,7 +780,18 @@ cdb.register(_CurveDBEntry("Ed448-Goldilocks", TwistedEdwardsCurve, {
 	"h": 4,
 	"Gx": 0x297ea0ea2692ff1b4faff46098453a6a26adf733245f065c3c59d0709cecfa96147eaaf3932d94c63d96c170033f4ba0c7f0de840aed939f,
 	"Gy": 19,
-}, aliases = [ "Ed448" ], origin = "2014 Hamburg"))
+}, origin = "2014 Hamburg"))
+
+# Curve imported from https://tools.ietf.org/html/rfc8032
+cdb.register(_CurveDBEntry("Ed448", TwistedEdwardsCurve, {
+	"a": 1,
+	"d": -39081,
+	"p": 0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffeffffffffffffffffffffffffffffffffffffffffffffffffffffffff,
+	"n": 0x3fffffffffffffffffffffffffffffffffffffffffffffffffffffff7cca23e9c44edb49aed63690216cc2728dc58f552378c292ab5844f3,
+	"h": 4,
+	"Gx": 0x4F1970C66BED0DED221D15A622BF36DA9E146570470F1767EA6DE324A3D3A46412AE1AF72AB66511433B80E18B00938E2626A82BC70CC05E,
+	"Gy": 0x693F46716EB6BC248876203756C9C7624BEA73736CA3984087789C1E05A0C2D73AD3FF1CE67C39C4FDBD132C4ED7C8AD9808795BF230FA14,
+}, aliases = [ "Ed448-rfc8032" ], origin = "2017 rfc8032"))
 
 # Curve imported from SafeCurves http://safecurves.cr.yp.to
 cdb.register(_CurveDBEntry("M-511", MontgomeryCurve, {
