@@ -28,7 +28,7 @@ from .Exceptions import UnsupportedPointFormatException
 class PointOpEDDSAEncoding(object):
 	def eddsa_encode(self):
 		"""Performs serialization of the point as required by EdDSA."""
-		bitlen = self.curve.p.bit_length()
+		bitlen = self.curve.B-1
 		enc_value = int(self.y)
 		enc_value &= ((1 << bitlen) - 1)
 		enc_value |= (int(self.x) & 1) << bitlen
@@ -36,20 +36,23 @@ class PointOpEDDSAEncoding(object):
 
 	@staticmethod
 	def __eddsa_recoverx(curve, y):
-		xx = (y * y - 1) // (curve.d * y * y + 1)
-		x = xx ** ((curve.p + 3) // 8)
-		if x * x != xx:
-			I = FieldElement(-1, curve.p).sqrt()[0]
-			x = x * I
-		if (int(x) % 2) != 0:
-			x = -x
+		x = 0
+		xx = (y * y - 1) // (curve.d * y * y - curve.a)
+		if curve.p % 8 == 5:
+			x = xx ** ((curve.p + 3) // 8)
+			if x * x == -xx:
+				x = x * (FieldElement(2, curve.p) ** ((curve.p-1) // 4))
+		elif curve.p % 4 == 3:
+			x = xx ** ((curve.p + 1) // 4)
+			if x * x != xx:
+				x = 0
 		return int(x)
 
 	@classmethod
 	def eddsa_decode(cls, curve, data):
 		"""Performs deserialization of the point as required by EdDSA."""
 		assert(curve.curvetype == "twistededwards")
-		bitlen = curve.p.bit_length()
+		bitlen = curve.B-1
 		enc_value = Tools.bytestoint_le(data)
 		y = enc_value & ((1 << bitlen) - 1)
 		x = PointOpEDDSAEncoding.__eddsa_recoverx(curve, y)

@@ -27,6 +27,7 @@ from .ECTests import ECTests
 from .CryptoOpsTests import CryptoOpsTests
 from .CurveTests import CurveTests
 from .OpenSSLCurveTests import OpenSSLCurveTests
+from .Ed448BasicTests import Ed448BasicTests
 from .Ed25519BasicTests import Ed25519BasicTests
 from .Ed25519ExtdTests import Ed25519ExtdTests
 from .TwEdMontConversionTests import TwEdMontConversionTests

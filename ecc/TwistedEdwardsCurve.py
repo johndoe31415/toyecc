@@ -82,7 +82,14 @@ class TwistedEdwardsCurve(EllipticCurve):
 	@property
 	def B(self):
 		"""Returns the length of the curve's field modulus in bits plus one."""
+		if self.is_ed448:
+			return 456
 		return self._p.bit_length() + 1
+
+	@property
+	def is_ed448(self):
+		"""Returns True if the curve is an Ed448 curve. """
+		return self._p.bit_length() == 448
 
 	@property
 	def is_complete(self):
