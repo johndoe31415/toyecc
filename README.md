@@ -1,5 +1,6 @@
-joeecc
-=======
+# joeecc
+[![Build Status](https://travis-ci.com/johndoe31415/joeecc.svg?branch=master)](https://travis-ci.org/johndoe31415/joeecc)
+
 joeecc is a playground for Elliptic Curve Cryptography in F<sub>P</sub>. It is
 written in pure Python and aims to explain ECC in easy terms. It is neither
 written to be performant, nor side-channel resistant nor in any way suited for
@@ -17,16 +18,12 @@ having values that directly can be checked against the curve equation makes
 understanding everything extremely easy.
 
 
-Tutorial
---------
+## Tutorial
 There's a ECC tutorial that I've written which accompanies the pure code. It
-can be found at
-
-   http://johannes-bauer.com/compsci/ecc/
+can be found at [http://johannes-bauer.com/compsci/ecc/](http://johannes-bauer.com/compsci/ecc/)
 
 
-Features
---------
+## Features
   * ECDSA demonstration
   * ECIES demonstration
   * ECDH demonstration
