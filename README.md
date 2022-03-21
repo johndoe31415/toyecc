@@ -18,6 +18,14 @@ values that directly can be checked against the curve equation makes
 understanding everything extremely easy.
 
 
+## Installation
+toyecc is available on PyPi. You can install it by:
+
+```
+$ pip3 install toyecc
+```
+
+
 ## Tutorial
 There's a ECC tutorial that I've written which accompanies the pure code. It
 can be found at [http://johannes-bauer.com/compsci/ecc/](http://johannes-bauer.com/compsci/ecc/)
