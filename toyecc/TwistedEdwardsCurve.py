@@ -137,7 +137,7 @@ class TwistedEdwardsCurve(EllipticCurve):
 				raise Exception("The b coefficient of the resulting curve must be a quadratic %s modulo p, %s is not." % ([ "non-residue", "residue" ][native_b.is_qr], str(b)))
 
 		# Generate the raw curve without a generator yet
-		raw_curve = ecc.MontgomeryCurve.MontgomeryCurve(
+		raw_curve = toyecc.MontgomeryCurve.MontgomeryCurve(
 			a = int(a),
 			b = int(b),
 			p = self.p,
@@ -152,7 +152,7 @@ class TwistedEdwardsCurve(EllipticCurve):
 		G_m = self.G.convert(raw_curve)
 
 		# And create the curve again, setting this generator
-		montgomery_curve = ecc.MontgomeryCurve.MontgomeryCurve(
+		montgomery_curve = toyecc.MontgomeryCurve.MontgomeryCurve(
 			a = int(a),
 			b = int(b),
 			p = self.p,

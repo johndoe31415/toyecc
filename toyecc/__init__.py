@@ -10,14 +10,14 @@ attacks in order to cleanly demonstrate the concepts.
 There is a curve database included in toyecc which already knows lots of
 interesting elliptic curves by name:
 
-	import ecc
-	curve = ecc.getcurvebyname("secp112r1")
+	import toyecc
+	curve = toyecc.getcurvebyname("secp112r1")
 	print(curve)
 		ShortWeierstrassCurve<secp112r1>
 
 On this curve you can now create a public/private keypair:
 
-	privkey = ecc.ECPrivateKey.generate(curve)
+	privkey = toyecc.ECPrivateKey.generate(curve)
 	print(privkey)
 		PrivateKey<d = 0x89fb9821aa5154c9934b3e0268ef>
 	print(privkey.pubkey)
@@ -26,7 +26,7 @@ On this curve you can now create a public/private keypair:
 You can also regenerate this keypair later on if you wish to remain it static
 and not change with every invocation:
 
-	privkey = ecc.ECPrivateKey(0x89fb9821aa5154c9934b3e0268ef, curve)
+	privkey = toyecc.ECPrivateKey(0x89fb9821aa5154c9934b3e0268ef, curve)
 	print(privkey)
 		PrivateKey<d = 0x89fb9821aa5154c9934b3e0268ef>
 
@@ -39,14 +39,14 @@ You can use this keypair to perform actions like ECDSA signing:
 If you want to recreate a public key anew, you can also do so by first creating
 the public point:
 
-	pubkeypt = ecc.AffineCurvePoint(0x69976db41f5e487928463b9f8a38, 0xda1fdba3de89c58683bd2d635430, curve)
+	pubkeypt = toyecc.AffineCurvePoint(0x69976db41f5e487928463b9f8a38, 0xda1fdba3de89c58683bd2d635430, curve)
 	print(pubkeypt)
 		(0x69976db41f5e487928463b9f8a38, 0xda1fdba3de89c58683bd2d635430)
 
 Then you can just wrap the point in a ECPublicKey object to have access to
 methods like ECDSA verification and such:
 
-	pubkey = ecc.ECPublicKey(pubkeypt)
+	pubkey = toyecc.ECPublicKey(pubkeypt)
 	print(pubkey)
 		PublicKey<(0x69976db41f5e487928463b9f8a38, 0xda1fdba3de89c58683bd2d635430)>
 
@@ -63,7 +63,7 @@ And change the message so the signature would become invalid:
 
 #
 #	toyecc - A small Elliptic Curve Cryptography Demonstration.
-#	Copyright (C) 2011-2016 Johannes Bauer
+#	Copyright (C) 2011-2022 Johannes Bauer
 #
 #	This file is part of toyecc.
 #
@@ -90,3 +90,5 @@ from .CurveDB import getcurvedb, getcurveentry, getcurvebyname, getcurvenames
 from .ECPrivateKey import ECPrivateKey
 from .ECPublicKey import ECPublicKey
 from .ShortWeierstrassCurve import ShortWeierstrassCurve
+
+VERSION = "0.0.7rc0"

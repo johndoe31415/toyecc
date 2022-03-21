@@ -132,7 +132,7 @@ class MontgomeryCurve(EllipticCurve):
 		d = (self.a - 2) // conversion_b
 
 		# Then construct a curve with no generator first
-		raw_curve = ecc.TwistedEdwardsCurve.TwistedEdwardsCurve(
+		raw_curve = toyecc.TwistedEdwardsCurve.TwistedEdwardsCurve(
 			a = int(a),
 			d = int(d),
 			p = self.p,
@@ -146,7 +146,7 @@ class MontgomeryCurve(EllipticCurve):
 		G_twed = self.G.convert(raw_curve)
 
 		# And recreate the curve with this new generator
-		twed_curve = ecc.TwistedEdwardsCurve.TwistedEdwardsCurve(
+		twed_curve = toyecc.TwistedEdwardsCurve.TwistedEdwardsCurve(
 			a = int(a),
 			d = int(d),
 			p = self.p,
