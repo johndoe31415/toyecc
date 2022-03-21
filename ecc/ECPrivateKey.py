@@ -1,6 +1,6 @@
 #
 #	joeecc - A small Elliptic Curve Cryptography Demonstration.
-#	Copyright (C) 2011-2016 Johannes Bauer
+#	Copyright (C) 2011-2022 Johannes Bauer
 #
 #	This file is part of joeecc.
 #
@@ -21,11 +21,11 @@
 #	Johannes Bauer <JohannesBauer@gmx.de>
 #
 
-from .PrivKeyOps import PrivKeyOpECDSASign, PrivKeyOpECIESDecrypt, PrivKeyOpEDDSASign, PrivKeyOpEDDSAKeyGen, PrivKeyOpEDDSAEncode, PrivKeyOpECDH, PrivKeyOpLoad
+from .PrivKeyOps import PrivKeyOpECDSASign, PrivKeyOpECIESDecrypt, PrivKeyOpEDDSASign, PrivKeyOpEDDSAKeyGen, PrivKeyOpEDDSAEncode, PrivKeyOpECDH, PrivKeyOpLoad, PrivKeyOpECDHXOnly
 from .ECPublicKey import ECPublicKey
 from .Random import secure_rand_int_between
 
-class ECPrivateKey(PrivKeyOpECDSASign, PrivKeyOpECIESDecrypt, PrivKeyOpEDDSASign, PrivKeyOpEDDSAKeyGen, PrivKeyOpEDDSAEncode, PrivKeyOpECDH, PrivKeyOpLoad):
+class ECPrivateKey(PrivKeyOpECDSASign, PrivKeyOpECIESDecrypt, PrivKeyOpEDDSASign, PrivKeyOpEDDSAKeyGen, PrivKeyOpEDDSAEncode, PrivKeyOpECDH, PrivKeyOpLoad, PrivKeyOpECDHXOnly):
 	"""Represents an elliptic curve private key."""
 
 	def __init__(self, scalar, curve):

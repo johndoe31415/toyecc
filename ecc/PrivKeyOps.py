@@ -1,6 +1,6 @@
 #
 #	joeecc - A small Elliptic Curve Cryptography Demonstration.
-#	Copyright (C) 2011-2016 Johannes Bauer
+#	Copyright (C) 2011-2022 Johannes Bauer
 #
 #	This file is part of joeecc.
 #
@@ -239,3 +239,64 @@ class PrivKeyOpLoad(object):
 			return cls.load_derdata(data)
 
 
+class PrivKeyOpECDHXOnly():
+	"""Compute an X-only ladder scalar multiplication of the private key and
+	the X coordinate of a given point."""
+	def _x_double(self, x):
+		"""Doubling of point with coordinate x."""
+		num = (x**2 - self.curve.a)**2 - (8 * self.curve.b * x)
+		den = 4 * (x**3 + self.curve.a * x + self.curve.b)
+		return num // den
+
+	def _x_add_multiplicative(self, x1, x2, x3prime):
+		"""Multiplicative formula addition of x1 + x2, where x3' is the
+		difference in X of P1 - P2. Using this function only makes sense where
+		(P1 - P2) is fixed, as it is in the ladder implementation."""
+		if x1 == x2:
+			return 0
+		num = -4 * self.curve.b * (x1 + x2) + (x1 * x2 - self.curve.a)**2
+		den = x3prime * (x1 - x2)**2
+		if den == 0:
+			# TODO: How can this happen?
+			return 0
+		result = num // den
+		return result
+
+	def _x_add_additive(self, x1, x2, x3prime):
+		"""Additive formula addition of x1 + x2, where x3' is the difference in
+		X of P1 - P2. Using this function only makes sense where (P1 - P2) is
+		fixed, as it is in the ladder implementation."""
+		if x1 == x2:
+			return 0
+		num = 2 * (x1 + x2) * (x1 * x2 + self.curve.a) + 4 * self.curve.b
+		den = (x1 - x2) ** 2
+		if den == 0:
+			# TODO: How can this happen?
+			return 0
+		result = num // den - x3prime
+		return result
+
+	def _x_add(self, x1, x2, x3prime):
+		"""There are two equivalent implementations, one using the
+		multiplicative and the other using the additive representation. Both
+		should work equally well."""
+		return self._x_add_multiplicative(x1, x2, x3prime)
+		#return self._x_add_additive(x1, x2, x3prime)
+
+	def scalar_mul_xonly(self, x_coordinate):
+		"""This implements the X-coordinate-only multiplication algorithm of a
+		Short Weierstrass curve with the X coordinate of a given point.
+		Reference is "Izu and Takagi: A Fast Parallel Elliptic Curve
+		Multiplication Resistant against Side Channel Attacks" (2002)"""
+		if self.curve.curvetype != "shortweierstrass":
+			raise NotImplementedError("X-only ladder multiplication is only implemented for Short Weierstrass curves")
+		if not isinstance(x_coordinate, FieldElement):
+			x_coordinate = FieldElement(x_coordinate, self.curve.p)
+		Q = [ x_coordinate, self._x_double(x_coordinate), None ]
+		for bitno in reversed(range(self.scalar.bit_length() - 1)):
+			bit = (self.scalar >> bitno) & 1
+			Q[2] = self._x_double(Q[bit])
+			Q[1] = self._x_add(Q[0], Q[1], x_coordinate)
+			Q[0] = Q[2 - bit]
+			Q[1] = Q[1 + bit]
+		return Q[0]

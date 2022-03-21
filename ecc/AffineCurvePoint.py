@@ -1,6 +1,6 @@
 #
 #	joeecc - A small Elliptic Curve Cryptography Demonstration.
-#	Copyright (C) 2011-2016 Johannes Bauer
+#	Copyright (C) 2011-2022 Johannes Bauer
 #
 #	This file is part of joeecc.
 #
@@ -100,7 +100,7 @@ class AffineCurvePoint(PointOpEDDSAEncoding, PointOpCurveConversion, PointOpNaiv
 				if (scalar & (1 << bit)):
 					result = result + n
 				n = n + n
-		assert(result.oncurve())
+		#assert(result.oncurve())
 		return result
 
 	def __eq__(self, other):

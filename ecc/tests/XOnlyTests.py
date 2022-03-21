@@ -21,21 +21,12 @@
 #	Johannes Bauer <JohannesBauer@gmx.de>
 #
 
-from .FieldElementTests import FieldElementTests
-from .FieldElementSqrtTests import FieldElementSqrtTests
-from .ECTests import ECTests
-from .CryptoOpsTests import CryptoOpsTests
-from .CurveTests import CurveTests
-from .OpenSSLCurveTests import OpenSSLCurveTests
-from .Ed25519BasicTests import Ed25519BasicTests
-from .Ed25519ExtdTests import Ed25519ExtdTests
-from .TwEdMontConversionTests import TwEdMontConversionTests
-from .TwEdMontDomainTests import TwEdMontDomainTests
-from .KeyLoadStoreTests import KeyLoadStoreTests
-from .PointSerializationTests import PointSerializationTests
-from .CurveQuirkTests import CurveQuirkTests
-from .PolyTests import PolyTests
-from .DivPolyTests import DivPolyTests
-from .CRTTests import CRTTests
-from .TwistTests import TwistTests
-from .XOnlyTests import XOnlyTests
+import unittest
+from .. import getcurvebyname, ECPrivateKey
+
+class XOnlyTests(unittest.TestCase):
+	def test_xonly_mul(self):
+		curve = getcurvebyname("secp112r1")
+		key = ECPrivateKey.generate(curve)
+		x = key.scalar_mul_xonly(curve.G.x)
+		self.assertEqual(x, key.pubkey.point.x)
