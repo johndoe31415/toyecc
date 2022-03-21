@@ -1,20 +1,20 @@
-# joeecc
-[![Build Status](https://app.travis-ci.com/johndoe31415/joeecc.svg?branch=master)](https://app.travis-ci.com/johndoe31415/joeecc)
+# toyecc
+[![Build Status](https://app.travis-ci.com/johndoe31415/toyecc.svg?branch=master)](https://app.travis-ci.com/johndoe31415/toyecc)
 
-joeecc is a playground for Elliptic Curve Cryptography in F<sub>P</sub>. It is
+toyecc is a playground for Elliptic Curve Cryptography in F<sub>P</sub>. It is
 written in pure Python and aims to explain ECC in easy terms. It is neither
 written to be performant, nor side-channel resistant nor in any way suited for
 productive use at all. Please use it for its intended purpose and for it only.
 
-The rationale behind joeecc is to show a clear and mathematically clean
+The rationale behind toyecc is to show a clear and mathematically clean
 presentation of the underlying mathematical problems. Most code that is written
 arund ECC -- especially code that revolves around Ed25519 and/or Curve25519 is
-heavily optimized and in many cases hard to understand.  joeecc tries to
-present the problems with a high level of abstraction in order to serve as yet
-another (different) reference to compare implementations against and in order
-to aid understanding of heavily optimized code. All curve arithmetic is
-therefore performed in affine space; performance in affine space is lowest, but
-having values that directly can be checked against the curve equation makes
+heavily optimized and in many cases hard to understand. toyecc tries to present
+the problems with a high level of abstraction in order to serve as yet another
+(different) reference to compare implementations against and in order to aid
+understanding of heavily optimized code. All curve arithmetic is therefore
+performed in affine space; performance in affine space is lowest, but having
+values that directly can be checked against the curve equation makes
 understanding everything extremely easy.
 
 

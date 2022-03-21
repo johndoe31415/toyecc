@@ -7,4 +7,4 @@ branches:
     only:
         - master
 
-script: python3 -m unittest ecc.tests
+script: python3 -m unittest toyecc.tests
