@@ -40,4 +40,8 @@ can be found at [http://johannes-bauer.com/compsci/ecc/](http://johannes-bauer.c
   * Many testcases to try out your own implementation
   * Example of OpenBSD's signify application (generates and verifies Ed25519
     signatures, but doesn't support key encryption)
+  * X-coordinate-only scalar multiplication on Short Weierstrass curves
   * Clean, well-documented Python3 code
+
+## License
+GNU GPL-3.
