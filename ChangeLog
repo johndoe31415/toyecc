@@ -1,5 +1,5 @@
-Summary of changes from v0.06 to v0.07 (2016-xx-xx)
-===================================================
+Summary of changes from v0.0.6 to v0.0.7 (2022-xx-xx)
+=====================================================
 
 	* ASN.1 parsing facility added to load EC public and private keys from PEM
 	or DER representation. Facility is inactive if pyasn1 is not installed on
@@ -26,9 +26,14 @@ Summary of changes from v0.06 to v0.07 (2016-xx-xx)
 	quadratic residue mod or returning a curve which is isomorphous on the
 	field extension GF(sqrt(d)). Also calculation of isomorphous curves with
 	fixed values for the curve coefficient a.
+	* Added support for Ed448 as implemnted by RFC8032 via PR#5
+	* Added Dual_EC_DBRG example
+	* Added X-coordinate-only scalar multiplication on Short Weierstrass
+	curves
+	* Retroactively changed versioning to use semantic versioning
 
-Summary of changes from v0.05 to v0.06 (2016-03-01)
-===================================================
+Summary of changes from v0.0.5 to v0.0.6 (2016-03-01)
+=====================================================
 
 	* Refactoring of curve database, include now the origin and OIDs
 	* Threw out some duplicate curves and instead added their names as aliases
@@ -36,8 +41,8 @@ Summary of changes from v0.05 to v0.06 (2016-03-01)
 	* Curve DB entries now have various means of displaying their pretty name
 	* Heuristic to detect Koblitz curves
 
-Summary of changes from v0.04 to v0.05 (2015-08-12)
-===================================================
+Summary of changes from v0.0.4 to v0.0.5 (2015-08-12)
+=====================================================
 
 	* Critical bugfix in twisted Edwards addition that somehow slipped through
 	all testcases before is now fixed.
@@ -47,8 +52,8 @@ Summary of changes from v0.04 to v0.05 (2015-08-12)
 	* Curve database is not initialize all at once now, but is generated lazy
 	(i.e. on first use)
 
-Summary of changes from v0.03 to v0.04 (2015-08-11)
-===================================================
+Summary of changes from v0.0.3 to v0.0.4 (2015-08-11)
+=====================================================
 
 	* Massively refactored code to be able to deal with twisted Edwards
 	curves, Montgomery curves and short-formed Weierstrass curves all similary
@@ -59,14 +64,14 @@ Summary of changes from v0.03 to v0.04 (2015-08-11)
 	and back. This includes conversion of Ed25519 and Curve25519 points back
 	and forth.
 
-Summary of changes from v0.02 to v0.03 (2015-08-06)
-===================================================
+Summary of changes from v0.0.2 to v0.0.3 (2015-08-06)
+=====================================================
 
 	* Updated the pysignify example to allow for signing, key generation and
 	private to public key conversion. Does not support encrypted private keys.
 
-Summary of changes from v0.01 to v0.02 (2015-08-05)
-===================================================
+Summary of changes from v0.0.1 to v0.0.2 (2015-08-05)
+=====================================================
 
 	* Reworked a lot of code to make it more readable and have better
 	performance, modularized the code in the ecc package
@@ -79,8 +84,8 @@ Summary of changes from v0.01 to v0.02 (2015-08-05)
 	* Export script for OpenSSL curves is now included and a curve database is
 	contained within the package
 
-Summary of features of v0.01 (2011-09-29)
-=========================================
+Summary of features of v0.0.1 (2011-09-29)
+==========================================
 
 	* Elliptic curve cryptography in F_P
 	* Examples for ECDSA, ECDH, ECIES
