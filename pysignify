@@ -1,22 +1,22 @@
 #!/usr/bin/python3
 #
-#	joeecc - A small Elliptic Curve Cryptography Demonstration.
-#	Copyright (C) 2011-2015 Johannes Bauer
+#	toyecc - A small Elliptic Curve Cryptography Demonstration.
+#	Copyright (C) 2011-2022 Johannes Bauer
 #
-#	This file is part of joeecc.
+#	This file is part of toyecc.
 #
-#	joeecc is free software; you can redistribute it and/or modify
+#	toyecc is free software; you can redistribute it and/or modify
 #	it under the terms of the GNU General Public License as published by
 #	the Free Software Foundation; this program is ONLY licensed under
 #	version 3 of the License, later versions are explicitly excluded.
 #
-#	joeecc is distributed in the hope that it will be useful,
+#	toyecc is distributed in the hope that it will be useful,
 #	but WITHOUT ANY WARRANTY; without even the implied warranty of
 #	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #	GNU General Public License for more details.
 #
 #	You should have received a copy of the GNU General Public License
-#	along with joeecc; if not, write to the Free Software
+#	along with toyecc; if not, write to the Free Software
 #	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 #	Johannes Bauer <JohannesBauer@gmx.de>
@@ -25,13 +25,13 @@
 import struct
 import base64
 import sys
-import ecc
+import toyecc
 import hashlib
-from ecc.Random import secure_rand
+from toyecc.Random import secure_rand
 
 from MultiCommand import MultiCommand
 
-Ed25519 = ecc.getcurvebyname("ed25519")
+Ed25519 = toyecc.getcurvebyname("ed25519")
 
 class SignifySignature(object):
 	_STRUCT = struct.Struct("< 2s 8s 64s")
@@ -59,7 +59,7 @@ class SignifySignature(object):
 		assert(header == b"Ed")
 		f.close()
 
-		signature = ecc.ECPrivateKey.EDDSASignature.decode(Ed25519, signature)
+		signature = toyecc.ECPrivateKey.EDDSASignature.decode(Ed25519, signature)
 		return SignifySignature(signature, fingerprint)
 
 	def __str__(self):
@@ -91,7 +91,7 @@ class SignifyPublicKey(object):
 		assert(header == b"Ed")
 		f.close()
 
-		pubkey = ecc.ECPublicKey.eddsa_decode(Ed25519, pubkey)
+		pubkey = toyecc.ECPublicKey.eddsa_decode(Ed25519, pubkey)
 		return SignifyPublicKey(pubkey, fingerprint)
 
 	def writetofile(self, filename):
@@ -124,7 +124,7 @@ class SignifyPrivateKey(object):
 
 	@staticmethod
 	def generate():
-		privkey = ecc.ECPrivateKey.eddsa_generate(Ed25519)
+		privkey = toyecc.ECPrivateKey.eddsa_generate(Ed25519)
 		fingerprint = secure_rand(8)
 		return SignifyPrivateKey(privkey, fingerprint)
 
@@ -145,7 +145,7 @@ class SignifyPrivateKey(object):
 
 		assert(hashlib.sha512(seckey).digest()[:8] == checksum)
 
-		privkey = ecc.ECPrivateKey.eddsa_decode(Ed25519, seckey[:32])
+		privkey = toyecc.ECPrivateKey.eddsa_decode(Ed25519, seckey[:32])
 		return SignifyPrivateKey(privkey, fingerprint)
 
 	def getpubkey(self):

@@ -10,12 +10,12 @@ else
 	TESTS="$1"
 	echo "$TESTS" >.runtests.txt
 fi
-python3 -c 'import ecc.tests'
+python3 -c 'import toyecc.tests'
 if [ "$?" != "0" ]; then
 	exit 1
 fi
 if [ "$TESTS" == "" ]; then
-	python3 -m unittest ecc.tests ${TESTS}
+	python3 -m unittest toyecc.tests ${TESTS}
 else
-	python3 -m unittest "ecc.tests.${TESTS}"
+	python3 -m unittest "toyecc.tests.${TESTS}"
 fi

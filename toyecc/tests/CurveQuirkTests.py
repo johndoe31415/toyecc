@@ -1,4 +1,3 @@
-#!/usr/bin/python3
 #
 #	toyecc - A small Elliptic Curve Cryptography Demonstration.
 #	Copyright (C) 2011-2022 Johannes Bauer
@@ -22,26 +21,17 @@
 #	Johannes Bauer <JohannesBauer@gmx.de>
 #
 
-import time
-import sys
-from toyecc import getcurvebyname, ECPrivateKey
-from StopWatch import StopWatch
+import unittest
+from ..CurveQuirks import CurveQuirkEdDSASetPrivateKeyMSB, CurveQuirkEdDSAEnsurePrimeOrderSubgroup
 
-curve = getcurvebyname("ed25519")
+class CurveQuirkTests(unittest.TestCase):
+	def test_basic(self):
+		s = set([ CurveQuirkEdDSASetPrivateKeyMSB(), CurveQuirkEdDSASetPrivateKeyMSB() ])
+		self.assertEqual(len(s), 1)
+		self.assertTrue(CurveQuirkEdDSASetPrivateKeyMSB() in s)
 
-if len(sys.argv) < 2:
-	keypair = ECPrivateKey.eddsa_generate(curve)
-	print("Generating keypair on the fly")
-else:
-	keypair = ECPrivateKey.loadkeypair(bytes.fromhex(sys.argv[1]))
-print("Keypair:", keypair)
+		s.add(CurveQuirkEdDSAEnsurePrimeOrderSubgroup())
+		self.assertEqual(len(s), 2)
 
-msg = b"Foobar!"
-print("Message:", msg)
-
-signature = keypair.eddsa_sign(msg)
-print("Signature:", signature)
-
-print("Verify correct message: %s (should be True)" % (keypair.pubkey.eddsa_verify(msg, signature)))
-print("Verify forged message : %s (should be False)" % (keypair.pubkey.eddsa_verify(msg + b"x", signature)))
-
+		s.add(CurveQuirkEdDSAEnsurePrimeOrderSubgroup())
+		self.assertEqual(len(s), 2)

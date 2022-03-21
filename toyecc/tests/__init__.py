@@ -1,4 +1,3 @@
-#!/usr/bin/python3
 #
 #	toyecc - A small Elliptic Curve Cryptography Demonstration.
 #	Copyright (C) 2011-2022 Johannes Bauer
@@ -22,26 +21,22 @@
 #	Johannes Bauer <JohannesBauer@gmx.de>
 #
 
-import time
-import sys
-from toyecc import getcurvebyname, ECPrivateKey
-from StopWatch import StopWatch
-
-curve = getcurvebyname("ed25519")
-
-if len(sys.argv) < 2:
-	keypair = ECPrivateKey.eddsa_generate(curve)
-	print("Generating keypair on the fly")
-else:
-	keypair = ECPrivateKey.loadkeypair(bytes.fromhex(sys.argv[1]))
-print("Keypair:", keypair)
-
-msg = b"Foobar!"
-print("Message:", msg)
-
-signature = keypair.eddsa_sign(msg)
-print("Signature:", signature)
-
-print("Verify correct message: %s (should be True)" % (keypair.pubkey.eddsa_verify(msg, signature)))
-print("Verify forged message : %s (should be False)" % (keypair.pubkey.eddsa_verify(msg + b"x", signature)))
-
+from .FieldElementTests import FieldElementTests
+from .FieldElementSqrtTests import FieldElementSqrtTests
+from .ECTests import ECTests
+from .CryptoOpsTests import CryptoOpsTests
+from .CurveTests import CurveTests
+from .OpenSSLCurveTests import OpenSSLCurveTests
+from .Ed448BasicTests import Ed448BasicTests
+from .Ed25519BasicTests import Ed25519BasicTests
+from .Ed25519ExtdTests import Ed25519ExtdTests
+from .TwEdMontConversionTests import TwEdMontConversionTests
+from .TwEdMontDomainTests import TwEdMontDomainTests
+from .KeyLoadStoreTests import KeyLoadStoreTests
+from .PointSerializationTests import PointSerializationTests
+from .CurveQuirkTests import CurveQuirkTests
+from .PolyTests import PolyTests
+from .DivPolyTests import DivPolyTests
+from .CRTTests import CRTTests
+from .TwistTests import TwistTests
+from .XOnlyTests import XOnlyTests

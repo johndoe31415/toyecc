@@ -1,4 +1,3 @@
-#!/usr/bin/python3
 #
 #	toyecc - A small Elliptic Curve Cryptography Demonstration.
 #	Copyright (C) 2011-2022 Johannes Bauer
@@ -22,26 +21,19 @@
 #	Johannes Bauer <JohannesBauer@gmx.de>
 #
 
-import time
-import sys
-from toyecc import getcurvebyname, ECPrivateKey
-from StopWatch import StopWatch
+import unittest
+import random
+from ..CRT import CRT
 
-curve = getcurvebyname("ed25519")
+class CRTTests(unittest.TestCase):
+	def test_crt(self):
+		crt = CRT()
+		crt.add(0, 5)
+		crt.add(5, 7)
+		crt.add(7, 8)
+		crt.add(7, 9)
+		crt.add(7, 11)
+		crt.add(0, 13)
 
-if len(sys.argv) < 2:
-	keypair = ECPrivateKey.eddsa_generate(curve)
-	print("Generating keypair on the fly")
-else:
-	keypair = ECPrivateKey.loadkeypair(bytes.fromhex(sys.argv[1]))
-print("Keypair:", keypair)
-
-msg = b"Foobar!"
-print("Message:", msg)
-
-signature = keypair.eddsa_sign(msg)
-print("Signature:", signature)
-
-print("Verify correct message: %s (should be True)" % (keypair.pubkey.eddsa_verify(msg, signature)))
-print("Verify forged message : %s (should be False)" % (keypair.pubkey.eddsa_verify(msg + b"x", signature)))
-
+		result = crt.solve()
+		self.assertEqual(result, 98215)

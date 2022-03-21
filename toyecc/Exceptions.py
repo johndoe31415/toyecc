@@ -1,4 +1,3 @@
-#!/usr/bin/python3
 #
 #	toyecc - A small Elliptic Curve Cryptography Demonstration.
 #	Copyright (C) 2011-2022 Johannes Bauer
@@ -22,26 +21,14 @@
 #	Johannes Bauer <JohannesBauer@gmx.de>
 #
 
-import time
-import sys
-from toyecc import getcurvebyname, ECPrivateKey
-from StopWatch import StopWatch
+class DuplicateCurveException(Exception):
+	pass
 
-curve = getcurvebyname("ed25519")
+class NoSuchCurveException(Exception):
+	pass
 
-if len(sys.argv) < 2:
-	keypair = ECPrivateKey.eddsa_generate(curve)
-	print("Generating keypair on the fly")
-else:
-	keypair = ECPrivateKey.loadkeypair(bytes.fromhex(sys.argv[1]))
-print("Keypair:", keypair)
+class UnsupportedPointFormatException(Exception):
+	pass
 
-msg = b"Foobar!"
-print("Message:", msg)
-
-signature = keypair.eddsa_sign(msg)
-print("Signature:", signature)
-
-print("Verify correct message: %s (should be True)" % (keypair.pubkey.eddsa_verify(msg, signature)))
-print("Verify forged message : %s (should be False)" % (keypair.pubkey.eddsa_verify(msg + b"x", signature)))
-
+class UnsupportedFieldException(Exception):
+	pass

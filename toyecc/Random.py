@@ -1,4 +1,3 @@
-#!/usr/bin/python3
 #
 #	toyecc - A small Elliptic Curve Cryptography Demonstration.
 #	Copyright (C) 2011-2022 Johannes Bauer
@@ -22,26 +21,29 @@
 #	Johannes Bauer <JohannesBauer@gmx.de>
 #
 
-import time
-import sys
-from toyecc import getcurvebyname, ECPrivateKey
-from StopWatch import StopWatch
+def secure_rand(length):
+	"""Returns a secure random bytes() object of the length 'length' bytes."""
+	f = open("/dev/urandom", "rb")
+	data = f.read(length)
+	assert(len(data) == length)
+	f.close()
+	return data
 
-curve = getcurvebyname("ed25519")
 
-if len(sys.argv) < 2:
-	keypair = ECPrivateKey.eddsa_generate(curve)
-	print("Generating keypair on the fly")
-else:
-	keypair = ECPrivateKey.loadkeypair(bytes.fromhex(sys.argv[1]))
-print("Keypair:", keypair)
+def secure_rand_int(max_value):
+	"""Yields a value 0 <= return < maxvalue."""
+	assert(max_value >= 2)
+	bytecnt = ((max_value - 1).bit_length() + 7) // 8
+	max_bin_value = 256 ** bytecnt
+	wholecnt = max_bin_value // max_value
+	cutoff = wholecnt * max_value
+	while True:
+		rnd = sum((value << (8 * bytepos)) for (bytepos, value) in enumerate(secure_rand(bytecnt)))
+		if rnd < cutoff:
+			break
+	return rnd % max_value
 
-msg = b"Foobar!"
-print("Message:", msg)
-
-signature = keypair.eddsa_sign(msg)
-print("Signature:", signature)
-
-print("Verify correct message: %s (should be True)" % (keypair.pubkey.eddsa_verify(msg, signature)))
-print("Verify forged message : %s (should be False)" % (keypair.pubkey.eddsa_verify(msg + b"x", signature)))
-
+def secure_rand_int_between(min_value, max_value):
+	"""Yields a random number which goes from min_value (inclusive) to
+	max_value (inclusive)."""
+	return secure_rand_int(max_value - min_value + 1) + min_value

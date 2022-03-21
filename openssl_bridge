@@ -3,9 +3,9 @@ import sys
 import re
 import subprocess
 import collections
-import ecc
+import toyecc
 from MultiCommand import MultiCommand
-	
+
 FPDomainParams = collections.namedtuple("FPDomainParams", [ "curvename", "A", "B", "p", "n", "h", "Gx", "Gy" ])
 
 def openssl_get_all_fp_curvenames(openssl_binary):
@@ -94,7 +94,7 @@ def openssl_get_curve_fp(openssl_binary, curvename):
 
 	assert(parsed["Field Type"] == "prime-field")
 
-	(Gx, Gy) = ecc.AffineCurvePoint.deserialize_uncompressed(parsed["Generator (uncompressed)"])
+	(Gx, Gy) = toyecc.AffineCurvePoint.deserialize_uncompressed(parsed["Generator (uncompressed)"])
 
 	p = parsed["Prime"]
 	A = parsed["A"]
@@ -105,7 +105,7 @@ def openssl_get_curve_fp(openssl_binary, curvename):
 		B -= p
 
 	return FPDomainParams(curvename = curvename, A = A, B = B, p = p, n = parsed["Order"], h = parsed["Cofactor"], Gx = Gx, Gy = Gy)
-	
+
 def print_param(name, value, maxbits):
 	name = "\"" + name + "\""
 	bits = value.bit_length()
@@ -146,9 +146,9 @@ def action_pubkey(cmd, args):
 	parsed = parse_openssl_text(output, {
 		"pub":		bytes,
 	})
-	(Px, Py) = ecc.AffineCurvePoint.deserialize_uncompressed(parsed["pub"])
-	print("curve = ecc.getcurvebyname(\"%s\")" % (parsed["ASN1 OID"]))
-	print("pubkey = ecc.ECPublicKey(ecc.AffineCurvePoint(0x%x, 0x%x, curve))" % (Px, Py))
+	(Px, Py) = toyecc.AffineCurvePoint.deserialize_uncompressed(parsed["pub"])
+	print("curve = toyecc.getcurvebyname(\"%s\")" % (parsed["ASN1 OID"]))
+	print("pubkey = toyecc.ECPublicKey(toyecc.AffineCurvePoint(0x%x, 0x%x, curve))" % (Px, Py))
 
 def action_privkey(cmd, args):
 	cmd = [ args.openssl, "ec", "-inform", args.inform, "-in", args.filename, "-text", "-noout" ]
@@ -164,12 +164,12 @@ def action_privkey(cmd, args):
 		"Generator (uncompressed)":	bytes,
 		"Seed":						bytes,
 	})
-	(Px, Py) = ecc.AffineCurvePoint.deserialize_uncompressed(parsed["pub"])
+	(Px, Py) = toyecc.AffineCurvePoint.deserialize_uncompressed(parsed["pub"])
 	if "ASN1 OID" in parsed:
-		print("curve = ecc.getcurvebyname(\"%s\")" % (parsed["ASN1 OID"]))
+		print("curve = toyecc.getcurvebyname(\"%s\")" % (parsed["ASN1 OID"]))
 	else:
-		(Gx, Gy) = ecc.AffineCurvePoint.deserialize_uncompressed(parsed["Generator (uncompressed)"])
-		print("curve = ecc.ShortWeierstrassCurve(")
+		(Gx, Gy) = toyecc.AffineCurvePoint.deserialize_uncompressed(parsed["Generator (uncompressed)"])
+		print("curve = toyecc.ShortWeierstrassCurve(")
 		print("	a = 0x%x," % (parsed["A"]))
 		print("	b = 0x%x," % (parsed["B"]))
 		print("	p = 0x%x," % (parsed["Prime"]))
@@ -178,15 +178,15 @@ def action_privkey(cmd, args):
 		print("	Gx = 0x%x," % (Gx))
 		print("	Gy = 0x%x" % (Gy))
 		print(")")
-	print("privkey = ecc.ECPrivateKey(0x%x, curve)" % (parsed["priv"]))
-	print("assert(privkey.pubkey.point == ecc.AffineCurvePoint(0x%x, 0x%x, curve))" % (Px, Py))
+	print("privkey = toyecc.ECPrivateKey(0x%x, curve)" % (parsed["priv"]))
+	print("assert(privkey.pubkey.point == toyecc.AffineCurvePoint(0x%x, 0x%x, curve))" % (Px, Py))
 
-mc = MultiCommand(help = "openssl_bridge: Bridging the gap between OpenSSL and joeecc in order to provide test and debugging data that can be used within joeecc.")
+mc = MultiCommand(help = "openssl_bridge: Bridging the gap between OpenSSL and toyecc in order to provide test and debugging data that can be used within toyecc.")
 
 def genparser(parser):
 	parser.add_argument("--openssl", metavar = "filename", type = str, default = "openssl", help = "Points to the OpenSSL CLI binary which shall be used. Defaults to %(default)s.")
 	parser.add_argument("-c", "--curve", metavar = "name", type = str, help = "Curve which should be dumped. If not specified, will dump all available curves.")
-mc.register("dumpcurve", "Dump one or all OpenSSL curves in a format that can be used by joeecc", genparser, action = action_dumpcurve)
+mc.register("dumpcurve", "Dump one or all OpenSSL curves in a format that can be used by toyecc", genparser, action = action_dumpcurve)
 
 def genparser(parser):
 	parser.add_argument("--openssl", metavar = "filename", type = str, default = "openssl", help = "Points to the OpenSSL CLI binary which shall be used. Defaults to %(default)s.")

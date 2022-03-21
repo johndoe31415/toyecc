@@ -1,4 +1,3 @@
-#!/usr/bin/python3
 #
 #	toyecc - A small Elliptic Curve Cryptography Demonstration.
 #	Copyright (C) 2011-2022 Johannes Bauer
@@ -22,26 +21,19 @@
 #	Johannes Bauer <JohannesBauer@gmx.de>
 #
 
-import time
-import sys
-from toyecc import getcurvebyname, ECPrivateKey
-from StopWatch import StopWatch
+import unittest
+import random
+from .. import getcurvebyname
 
-curve = getcurvebyname("ed25519")
+class TwEdMontDomainTests(unittest.TestCase):
+	def setUp(self):
+		self._mont = getcurvebyname("curve25519")
+		self._twed = getcurvebyname("ed25519")
 
-if len(sys.argv) < 2:
-	keypair = ECPrivateKey.eddsa_generate(curve)
-	print("Generating keypair on the fly")
-else:
-	keypair = ECPrivateKey.loadkeypair(bytes.fromhex(sys.argv[1]))
-print("Keypair:", keypair)
+	def test_twed_to_mont(self):
+		mont = self._twed.to_montgomery(b = int(self._mont.b))
+		self.assertEqual(mont.domainparams, self._mont.domainparams)
 
-msg = b"Foobar!"
-print("Message:", msg)
-
-signature = keypair.eddsa_sign(msg)
-print("Signature:", signature)
-
-print("Verify correct message: %s (should be True)" % (keypair.pubkey.eddsa_verify(msg, signature)))
-print("Verify forged message : %s (should be False)" % (keypair.pubkey.eddsa_verify(msg + b"x", signature)))
-
+	def test_mont_to_twed(self):
+		twed = self._mont.to_twistededwards(a = int(self._twed.a))
+		self.assertEqual(twed.domainparams, self._twed.domainparams)
