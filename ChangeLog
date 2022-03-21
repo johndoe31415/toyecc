@@ -1,4 +1,4 @@
-Summary of changes from v0.0.6 to v0.0.7 (2022-xx-xx)
+Summary of changes from v0.0.6 to v0.0.7 (2022-03-22)
 =====================================================
 
 	* ASN.1 parsing facility added to load EC public and private keys from PEM
