@@ -1,5 +1,5 @@
 # joeecc
-[![Build Status](https://travis-ci.com/johndoe31415/joeecc.svg?branch=master)](https://travis-ci.com/johndoe31415/joeecc)
+[![Build Status](https://app.travis-ci.com/johndoe31415/joeecc.svg?branch=master)](https://app.travis-ci.com/johndoe31415/joeecc)
 
 joeecc is a playground for Elliptic Curve Cryptography in F<sub>P</sub>. It is
 written in pure Python and aims to explain ECC in easy terms. It is neither
