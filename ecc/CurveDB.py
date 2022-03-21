@@ -31,7 +31,7 @@ from .FieldElement import FieldElement
 from .Exceptions import DuplicateCurveException, NoSuchCurveException, UnsupportedFieldException
 from .ASN1 import parse_asn1_field_params_fp
 from .AffineCurvePoint import AffineCurvePoint
-from .CurveQuirks import CurveQuirkEdDSASetPrivateKeyMSB, CurveQuirkEdDSAEnsurePrimeOrderSubgroup, CurveQuirkSigningHashFunction, CurveQuirkDataLength
+from .CurveQuirks import CurveQuirkEdDSASetPrivateKeyMSB, CurveQuirkEdDSAEnsurePrimeOrderSubgroup, CurveQuirkSigningHashFunction
 from . import Tools
 
 @singleton

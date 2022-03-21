@@ -75,16 +75,3 @@ class CurveQuirkSigningHashFunction(CurveQuirk):
 			"shake256-114":		lambda x: hashlib.shake_256(data).digest(114),
 		}
 		return hash_fnc[self._sig_fnc_name](data)
-
-class CurveQuirkDataLength(CurveQuirk):
-	"""For some curves, encoding lengths may not be directly derived from the
-	underlying values. For example, Ed448 requires 57 bytes per coordinate
-	instead of 448/8 = 56 bytes."""
-	identifier = "data_length"
-
-	def __init__(self, coordinate_size_bytes = None):
-		self._coordinate_size_bytes = coordinate_size_bytes
-
-	@property
-	def coordinate_size_bytes(self):
-		return self._coordinate_size_bytes
