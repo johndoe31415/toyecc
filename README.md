@@ -28,6 +28,7 @@ can be found at [http://johannes-bauer.com/compsci/ecc/](http://johannes-bauer.c
   * ECIES demonstration
   * ECDH demonstration
   * Elgamal demonstration
+  * Dual_EC_DBRG backdoor demonstration
   * Demonstration how a private key can be recovered from two ECDSA signatures
     which reused the same nonce (ECDSA nonce exploit)
   * Support for short-formed Weierstrass curves, Montgomery curves and twisted
