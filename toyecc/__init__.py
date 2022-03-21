@@ -91,4 +91,4 @@ from .ECPrivateKey import ECPrivateKey
 from .ECPublicKey import ECPublicKey
 from .ShortWeierstrassCurve import ShortWeierstrassCurve
 
-VERSION = "0.0.7"
+VERSION = "0.0.8rc0"
