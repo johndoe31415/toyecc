@@ -1,3 +1,26 @@
+#
+#	joeecc - A small Elliptic Curve Cryptography Demonstration.
+#	Copyright (C) 2011-2022 Johannes Bauer
+#
+#	This file is part of joeecc.
+#
+#	joeecc is free software; you can redistribute it and/or modify
+#	it under the terms of the GNU General Public License as published by
+#	the Free Software Foundation; this program is ONLY licensed under
+#	version 3 of the License, later versions are explicitly excluded.
+#
+#	joeecc is distributed in the hope that it will be useful,
+#	but WITHOUT ANY WARRANTY; without even the implied warranty of
+#	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#	GNU General Public License for more details.
+#
+#	You should have received a copy of the GNU General Public License
+#	along with joeecc; if not, write to the Free Software
+#	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+#	Johannes Bauer <JohannesBauer@gmx.de>
+#
+
 import unittest
 from .. import FieldElement, getcurvebyname, ECPublicKey, ECPrivateKey
 
@@ -14,7 +37,7 @@ class Ed448BasicTests(unittest.TestCase):
 			self.assertFalse(privkey.pubkey.eddsa_verify(msg + b"x", signature))
 
 	def test_sig_encode_decode(self):
-		curves = [getcurvebyname("Ed448-Goldilocks"), getcurvebyname("Ed448")]
+		curves = [ getcurvebyname("Ed448"), getcurvebyname("Ed448-Goldilocks") ]
 		for curve in curves:
 			privkey = ECPrivateKey.eddsa_generate(curve)
 			msg = b"foobar"

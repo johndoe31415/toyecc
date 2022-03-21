@@ -1,6 +1,6 @@
 #
 #	joeecc - A small Elliptic Curve Cryptography Demonstration.
-#	Copyright (C) 2011-2016 Johannes Bauer
+#	Copyright (C) 2011-2022 Johannes Bauer
 #
 #	This file is part of joeecc.
 #
@@ -30,6 +30,7 @@ from . import Tools
 from .PrivKeyOps import PrivKeyOpLoad
 from .ASN1 import parse_asn1_public_key
 from .CurveDB import CurveDB
+from .CurveQuirks import CurveQuirkSigningHashFunction
 
 class PubKeyOpECDSAExploitReusedNonce(object):
 	def ecdsa_exploit_reused_nonce(self, msg1, sig1, msg2, sig2):
@@ -102,11 +103,10 @@ class PubKeyOpECDSAVerify(object):
 class PubKeyOpEDDSAVerify(object):
 	def eddsa_verify(self, message, signature):
 		"""Verify an EdDSA signature over a message."""
-		if self.curve.is_ed448:
-			hash_fnct = Tools.ed448_hash
-		else:
-			hash_fnct = Tools.eddsa_hash
-		h = Tools.bytestoint_le(hash_fnct(signature.R.eddsa_encode() + self.point.eddsa_encode() + message))
+		if not self.curve.has_quirk(CurveQuirkSigningHashFunction):
+			raise Exception("Unable to determine EdDSA signature function.")
+		quirk = self.curve.get_quirk(CurveQuirkSigningHashFunction)
+		h = Tools.bytestoint_le(quirk.hashdata(signature.R.eddsa_encode() + self.point.eddsa_encode() + message))
 		return (signature.s * self.curve.G) == signature.R + (h * self.point)
 
 

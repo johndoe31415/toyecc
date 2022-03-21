@@ -1,6 +1,6 @@
 #
 #	joeecc - A small Elliptic Curve Cryptography Demonstration.
-#	Copyright (C) 2011-2016 Johannes Bauer
+#	Copyright (C) 2011-2022 Johannes Bauer
 #
 #	This file is part of joeecc.
 #
@@ -110,7 +110,7 @@ class Ed25519ExtdTests(unittest.TestCase):
 			handler(testcase)
 
 	def test_djb_sigs(self):
-		for testcase in tcs_from_file(self._basedir + "djb.txt"):
+		for (tcid, testcase) in enumerate(tcs_from_file(self._basedir + "djb.txt")):
 			# Skip lots of tests randomly for time reasons
 			if (self._TEST_SCOPE == "minimal") and (random.randrange(100) > 0):
 				continue
@@ -118,4 +118,3 @@ class Ed25519ExtdTests(unittest.TestCase):
 			handlername = "_run_" + testcase.name
 			handler = getattr(self, handlername)
 			handler(testcase)
-

@@ -1,6 +1,6 @@
 #
 #	joeecc - A small Elliptic Curve Cryptography Demonstration.
-#	Copyright (C) 2011-2016 Johannes Bauer
+#	Copyright (C) 2011-2022 Johannes Bauer
 #
 #	This file is part of joeecc.
 #
@@ -20,6 +20,8 @@
 #
 #	Johannes Bauer <JohannesBauer@gmx.de>
 #
+
+import hashlib
 
 class CurveQuirk(object):
 	identifier = None
@@ -58,3 +60,31 @@ class CurveQuirkEdDSAEnsurePrimeOrderSubgroup(CurveQuirk):
 	zero because the curve cofactor is 8."""
 	identifier = "EdDSA_use_prime_order_subgroup"
 
+class CurveQuirkSigningHashFunction(CurveQuirk):
+	"""For some curves, the signing hash function is implicitly given. In
+	particular for the Ed448 and Ed25519 variants, this is true. Encode these
+	as a curve quirk."""
+	identifier = "signing_hash_function"
+
+	def __init__(self, sig_fnc_name):
+		self._sig_fnc_name = sig_fnc_name
+
+	def hashdata(self, data):
+		hash_fnc = {
+			"sha512":			lambda x: hashlib.sha512(data).digest(),
+			"shake256-114":		lambda x: hashlib.shake_256(data).digest(114),
+		}
+		return hash_fnc[self._sig_fnc_name](data)
+
+class CurveQuirkDataLength(CurveQuirk):
+	"""For some curves, encoding lengths may not be directly derived from the
+	underlying values. For example, Ed448 requires 57 bytes per coordinate
+	instead of 448/8 = 56 bytes."""
+	identifier = "data_length"
+
+	def __init__(self, coordinate_size_bytes = None):
+		self._coordinate_size_bytes = coordinate_size_bytes
+
+	@property
+	def coordinate_size_bytes(self):
+		return self._coordinate_size_bytes

@@ -1,6 +1,6 @@
 #
 #	joeecc - A small Elliptic Curve Cryptography Demonstration.
-#	Copyright (C) 2011-2016 Johannes Bauer
+#	Copyright (C) 2011-2022 Johannes Bauer
 #
 #	This file is part of joeecc.
 #
@@ -28,11 +28,12 @@ from .Exceptions import UnsupportedPointFormatException
 class PointOpEDDSAEncoding(object):
 	def eddsa_encode(self):
 		"""Performs serialization of the point as required by EdDSA."""
-		bitlen = self.curve.B-1
+		coordlen = (self.curve.B + 7) // 8
+		bitlen = (coordlen * 8) - 1
 		enc_value = int(self.y)
 		enc_value &= ((1 << bitlen) - 1)
 		enc_value |= (int(self.x) & 1) << bitlen
-		return Tools.inttobytes_le(enc_value, self.curve.B // 8)
+		return Tools.inttobytes_le(enc_value, (self.curve.B + 7) // 8)
 
 	@staticmethod
 	def __eddsa_recoverx(curve, y):
@@ -41,7 +42,7 @@ class PointOpEDDSAEncoding(object):
 		if curve.p % 8 == 5:
 			x = xx ** ((curve.p + 3) // 8)
 			if x * x == -xx:
-				x = x * (FieldElement(2, curve.p) ** ((curve.p-1) // 4))
+				x = x * (FieldElement(2, curve.p) ** ((curve.p - 1) // 4))
 		elif curve.p % 4 == 3:
 			x = xx ** ((curve.p + 1) // 4)
 			if x * x != xx:
@@ -52,8 +53,9 @@ class PointOpEDDSAEncoding(object):
 	def eddsa_decode(cls, curve, data):
 		"""Performs deserialization of the point as required by EdDSA."""
 		assert(curve.curvetype == "twistededwards")
-		bitlen = curve.B-1
-		enc_value = Tools.bytestoint_le(data)
+		coordlen = (curve.B + 7) // 8
+		bitlen = (coordlen * 8) - 1
+		enc_value = int.from_bytes(data, byteorder = "little")
 		y = enc_value & ((1 << bitlen) - 1)
 		x = PointOpEDDSAEncoding.__eddsa_recoverx(curve, y)
 		hibit = (enc_value >> bitlen) & 1

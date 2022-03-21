@@ -31,7 +31,7 @@ from .CurveDB import CurveDB
 from .ShortWeierstrassCurve import ShortWeierstrassCurve
 from .ASN1 import parse_asn1_private_key, parse_asn1_field_params_fp
 from . import Tools
-from .CurveQuirks import CurveQuirkEdDSASetPrivateKeyMSB, CurveQuirkEdDSAEnsurePrimeOrderSubgroup
+from .CurveQuirks import CurveQuirkEdDSASetPrivateKeyMSB, CurveQuirkEdDSAEnsurePrimeOrderSubgroup, CurveQuirkSigningHashFunction
 
 class PrivKeyOpECDSASign(object):
 	ECDSASignature = collections.namedtuple("ECDSASignature", [ "hashalg", "r", "s" ])
@@ -106,20 +106,16 @@ class PrivKeyOpEDDSASign(object):
 
 		def encode(self):
 			"""Performs serialization of the signature as used by EdDSA."""
-			return self.R.eddsa_encode() + Tools.inttobytes_le(self.s, self.curve.B // 8)
+			return self.R.eddsa_encode() + Tools.inttobytes_le(self.s, (self.curve.B + 7) // 8)
 
 		@classmethod
 		def decode(cls, curve, encoded_signature):
 			"""Performs deserialization of the signature as used by EdDSA."""
 			assert(isinstance(encoded_signature, bytes))
-			if curve.is_ed448:
-				assert(len(encoded_signature) == 114)
-				encoded_R = encoded_signature[:57]
-				encoded_s = encoded_signature[57:]
-			else:
-				assert(len(encoded_signature) == 64)
-				encoded_R = encoded_signature[:32]
-				encoded_s = encoded_signature[32:]
+			coordlen = (curve.B + 7) // 8
+			assert(len(encoded_signature) == 2 * coordlen)
+			encoded_R = encoded_signature[:coordlen]
+			encoded_s = encoded_signature[coordlen:]
 			R = AffineCurvePoint.eddsa_decode(curve, encoded_R)
 			s = Tools.bytestoint_le(encoded_s)
 			return cls(curve, R, s)
@@ -130,18 +126,6 @@ class PrivKeyOpEDDSASign(object):
 		def __str__(self):
 			return "EDDSASignature<R = %s, s = %s>" % (self.R, self.s)
 
-	@staticmethod
-	def __eddsa_hash(data):
-		return hashlib.sha512(data).digest()
-
-	@staticmethod
-	def __eddsa_shake_hash(data):
-		return hashlib.shake_256(data).digest(114)
-
-	@staticmethod
-	def __eddsa_bitof(data, bitno):
-		return (data[bitno // 8] >> (bitno % 8)) & 1
-
 	def eddsa_sign(self, message):
 		"""Performs an EdDSA signature of the message. For this to work the
 		curve has to be a twisted Edwards curve and the private key scalar has
@@ -151,54 +135,41 @@ class PrivKeyOpEDDSASign(object):
 		function generate()."""
 		assert(self.curve.curvetype == "twistededwards")
 		if self._seed is None:
-			raise Exception("EDDSA requires a seed which is the source for calculation of the private key scalar.")
-		if self.curve.is_ed448:
-			hash_fnct = self.__eddsa_shake_hash
-		else:
-			hash_fnct = self.__eddsa_hash
-		h = hash_fnct(self._seed)
-		r = Tools.bytestoint_le(hash_fnct(h[self.curve.B // 8 : (2*(self.curve.B // 8))] + message))
+			raise Exception("EdDSA requires a seed which is the source for calculation of the private key scalar.")
+		if not self.curve.has_quirk(CurveQuirkSigningHashFunction):
+			raise Exception("Unable to determine EdDSA signature function.")
+
+		quirk = self.curve.get_quirk(CurveQuirkSigningHashFunction)
+		h = quirk.hashdata(self._seed)
+
+		coordlen = (self.curve.B + 7) // 8
+		r = Tools.bytestoint_le(quirk.hashdata(h[coordlen : 2 * coordlen] + message))
 		R = r * self.curve.G
-		s = (r + Tools.bytestoint_le(hash_fnct(R.eddsa_encode() + self.pubkey.point.eddsa_encode() + message)) * self.scalar) % self.curve.n
+		s = (r + Tools.bytestoint_le(quirk.hashdata(R.eddsa_encode() + self.pubkey.point.eddsa_encode() + message)) * self.scalar) % self.curve.n
 		sig = self.EDDSASignature(self.curve, R, s)
 		return sig
 
 
 class PrivKeyOpEDDSAKeyGen(object):
-	@staticmethod
-	def __eddsa_bitof(data, bitpos):
-		return (data[bitpos // 8] >> (bitpos % 8)) & 1
-
-	@staticmethod
-	def __eddsa_bitstring(data, bitcnt):
-		return sum((PrivKeyOpEDDSAKeyGen.__eddsa_bitof(data, bitpos)) << bitpos for bitpos in range(bitcnt))
-
-	@staticmethod
-	def __eddsa_clamp_ed448(data):
-		""" clear 2 least sign. bits of first bytes, clear last byte and
-		set higest bit of the second to last byte (rfc8032) """
-		return Tools.bytestoint_le(int.to_bytes(data[0] & ~0x03, 1, 'little') + data[1:-2] + int.to_bytes(data[-2] | 0x80, 1, 'little'))
-
 	@classmethod
 	def eddsa_generate(cls, curve, seed = None):
 		"""Generates a randomly selected seed value. This seed value is then
-		hashed using the EdDSA hash function (SHA512 for ed2556 and Shake256 for ed448)
-  		and the resulting value is (slightly modified) used as the private key scalar.
-    	Since for EdDSA signing operations this seed value is needed, it is also stored
-		within the private key."""
+		hashed using the EdDSA hash function (SHA512 for Ed2556 and
+		Shake256-114 for Ed448) and the resulting value is (slightly modified)
+		used as the private key scalar.  Since for EdDSA signing operations
+		this seed value is needed, it is also stored within the private key."""
+		coordlen = (curve.B + 7) // 8
 		if seed is None:
-			seed = secure_rand(curve.B // 8)
+			seed = secure_rand(coordlen)
 		assert(isinstance(seed, bytes))
-		assert(len(seed) == curve.B // 8)
+		assert(len(seed) == coordlen)
 
-		# Calculate hash over seed
-		# And generate scalar from hash over seed
-		if curve.is_ed448:
-			h = Tools.ed448_hash(seed)
-			a = PrivKeyOpEDDSAKeyGen.__eddsa_clamp_ed448(h[ : curve.B // 8])
-		else:
-			h = Tools.eddsa_hash(seed)
-			a = PrivKeyOpEDDSAKeyGen.__eddsa_bitstring(h, curve.B-1)
+		# Calculate hash over seed and generate scalar from hash over seed
+		if not curve.has_quirk(CurveQuirkSigningHashFunction):
+			raise Exception("Unable to determine EdDSA signature function.")
+		quirk = curve.get_quirk(CurveQuirkSigningHashFunction)
+		h = quirk.hashdata(seed)
+		a = int.from_bytes(h[:coordlen], byteorder = "little") & ((1 << (curve.B - 1)) - 1)
 
 		# Do we need to mask out lower significant bits to ensure that we use a
 		# prime order subgroup?
@@ -210,9 +181,6 @@ class PrivKeyOpEDDSAKeyGen(object):
 		# Is the MSB of the curve always set to ensure constant runtime of the
 		# Montgomery ladder?
 		if curve.has_quirk(CurveQuirkEdDSASetPrivateKeyMSB):
-			# TODO: Clarify if we need to set bit at (bitlen(p) - 1) or
-			# (bitlen(n) + 1) -- for Ed25519 this unfortunately in both cases
-			# is 254.
 			bit = curve.n.bit_length() + 1
 			a |= (1 << bit)
 		privkey = cls(a, curve)

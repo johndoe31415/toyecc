@@ -1,6 +1,6 @@
 #
 #	joeecc - A small Elliptic Curve Cryptography Demonstration.
-#	Copyright (C) 2011-2016 Johannes Bauer
+#	Copyright (C) 2011-2022 Johannes Bauer
 #
 #	This file is part of joeecc.
 #
@@ -65,16 +65,6 @@ def ecdsa_msgdigest_to_int(message_digest, curveorder):
 		e >>= shift
 
 	return e
-
-def eddsa_hash(data):
-	"""Returns the message digest over the data which is used for EdDSA
-	(SHA-512)."""
-	return hashlib.sha512(data).digest()
-
-def ed448_hash(data):
-	"""Returns the message digest over the data which is used for Ed448
-	(SHAKE-256)."""
-	return hashlib.shake_256(data).digest(114)
 
 def load_pem_data(filename, specifier):
 	"""Loads the PEM payload, designated with a BEGIN and END specifier, from a
