@@ -3,3 +3,4 @@ __pycache__
 .*.swp
 .runtests.txt
 testdata/sage/*.py
+*.sage.py
