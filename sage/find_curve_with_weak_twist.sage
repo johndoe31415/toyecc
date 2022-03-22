@@ -25,6 +25,7 @@ import json
 import os
 from cysignals.alarm import alarm, AlarmInterrupt, cancel_alarm
 
+#p = (2 ** 127) - 1
 p = 0x00ffffffff00000001000000000000000000000000ffffffffffffffffffffffff
 filename = "curves_with_weak_twist_" + os.urandom(8).hex() + ".json"
 

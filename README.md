@@ -51,6 +51,8 @@ can be found at [http://johannes-bauer.com/compsci/ecc/](http://johannes-bauer.c
     signatures, but doesn't support key encryption)
   * X-coordinate-only scalar multiplication on Short Weierstrass curves
   * Clean, well-documented Python3 code
+  * Sage scripts that perform an invalid point attack using a vulnerable
+    X-only-ladder implementation of toyecc
 
 ## License
 GNU GPL-3.

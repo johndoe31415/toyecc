@@ -90,5 +90,6 @@ from .CurveDB import getcurvedb, getcurveentry, getcurvebyname, getcurvenames
 from .ECPrivateKey import ECPrivateKey
 from .ECPublicKey import ECPublicKey
 from .ShortWeierstrassCurve import ShortWeierstrassCurve
+from .CRT import CRT
 
 VERSION = "0.0.8rc0"

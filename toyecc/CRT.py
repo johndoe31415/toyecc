@@ -1,6 +1,6 @@
 #
 #	toyecc - A small Elliptic Curve Cryptography Demonstration.
-#	Copyright (C) 2011-2016 Johannes Bauer
+#	Copyright (C) 2011-2022 Johannes Bauer
 #
 #	This file is part of toyecc.
 #
@@ -23,7 +23,7 @@
 
 from .FieldElement import FieldElement
 
-class CRT(object):
+class CRT():
 	"""Implements the Chinese Remainder Theorem algorithm where a number of
 	modular congruences are given that all need to be satisfied."""
 	def __init__(self):
