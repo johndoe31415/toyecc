@@ -242,7 +242,7 @@ class PrivKeyOpECDHXOnly():
 		difference in X of P1 - P2. Using this function only makes sense where
 		(P1 - P2) is fixed, as it is in the ladder implementation."""
 		if x1 == x2:
-			return 0
+			return self._x_double(x1)
 		num = -4 * self.curve.b * (x1 + x2) + (x1 * x2 - self.curve.a)**2
 		den = x3prime * (x1 - x2)**2
 		if den == 0:
@@ -256,7 +256,7 @@ class PrivKeyOpECDHXOnly():
 		X of P1 - P2. Using this function only makes sense where (P1 - P2) is
 		fixed, as it is in the ladder implementation."""
 		if x1 == x2:
-			return 0
+			return self._x_double(x1)
 		num = 2 * (x1 + x2) * (x1 * x2 + self.curve.a) + 4 * self.curve.b
 		den = (x1 - x2) ** 2
 		if den == 0:
