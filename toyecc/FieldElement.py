@@ -227,6 +227,8 @@ class FieldElement(object):
 		return self.inverse() * value
 
 	def __eq__(self, value):
+		if value is None:
+			return False
 		value = self.__checktype(value)
 		return int(self) == (value % self.modulus)
 

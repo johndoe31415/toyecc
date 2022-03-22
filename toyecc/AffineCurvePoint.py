@@ -24,9 +24,9 @@
 import math
 
 from .FieldElement import FieldElement
-from .PointOps import PointOpEDDSAEncoding, PointOpCurveConversion, PointOpNaiveOrderCalculation, PointOpSerialization
+from .PointOps import PointOpEDDSAEncoding, PointOpCurveConversion, PointOpNaiveOrderCalculation, PointOpSerialization, PointOpScalarMultiplicationXOnly
 
-class AffineCurvePoint(PointOpEDDSAEncoding, PointOpCurveConversion, PointOpNaiveOrderCalculation, PointOpSerialization):
+class AffineCurvePoint(PointOpEDDSAEncoding, PointOpCurveConversion, PointOpNaiveOrderCalculation, PointOpSerialization, PointOpScalarMultiplicationXOnly):
 	"""Represents a point on a curve in affine (x, y) representation."""
 
 	def __init__(self, x, y, curve):

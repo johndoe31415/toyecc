@@ -178,3 +178,81 @@ class PointOpSerialization(object):
 			return cls(Px, Py, curve)
 		else:
 			return (Px, Py)
+
+class PointOpScalarMultiplicationXOnly():
+	"""Compute an X-only ladder scalar multiplication of the private key and
+	the X coordinate of a given point."""
+	def _x_double(self, x):
+		"""Doubling of point with coordinate x."""
+		if x is None:
+			return None
+
+		den = 4 * (x**3 + self.curve.a * x + self.curve.b)
+		if den == 0:
+			# Point at infinity
+			return None
+		num = (x**2 - self.curve.a)**2 - (8 * self.curve.b * x)
+		return num // den
+
+	def _x_add_multiplicative(self, x1, x2, x3prime):
+		"""Multiplicative formula addition of x1 + x2, where x3' is the
+		difference in X of P1 - P2. Using this function only makes sense where
+		(P1 - P2) is fixed, as it is in the ladder implementation."""
+		if x1 is None:
+			return x2
+		elif x2 is None:
+			return x1
+		elif x1 == x2:
+			return None
+		num = -4 * self.curve.b * (x1 + x2) + (x1 * x2 - self.curve.a)**2
+		den = x3prime * (x1 - x2)**2
+		result = num // den
+		return result
+
+	def _x_add_additive(self, x1, x2, x3prime):
+		"""Additive formula addition of x1 + x2, where x3' is the difference in
+		X of P1 - P2. Using this function only makes sense where (P1 - P2) is
+		fixed, as it is in the ladder implementation."""
+		if x1 is None:
+			return x2
+		elif x2 is None:
+			return x1
+		elif x1 == x2:
+			return None
+		num = 2 * (x1 + x2) * (x1 * x2 + self.curve.a) + 4 * self.curve.b
+		den = (x1 - x2) ** 2
+		result = num // den - x3prime
+		return result
+
+	def _x_add(self, x1, x2, x3prime):
+		"""There are two equivalent implementations, one using the
+		multiplicative and the other using the additive representation. Both
+		should work equally well."""
+		return self._x_add_multiplicative(x1, x2, x3prime)
+		#return self._x_add_additive(x1, x2, x3prime)
+
+	def scalar_mul_xonly(self, scalar):
+		"""This implements the X-coordinate-only multiplication algorithm of a
+		Short Weierstrass curve with the X coordinate of a given point.
+		Reference is "Izu and Takagi: A Fast Parallel Elliptic Curve
+		Multiplication Resistant against Side Channel Attacks" (2002)"""
+		if self.curve.curvetype != "shortweierstrass":
+			raise NotImplementedError("X-only ladder multiplication is only implemented for Short Weierstrass curves")
+		if self.is_neutral:
+			# Point at infinity is input
+			return None
+		elif scalar == 0:
+			# Multiplication with zero -> point at infinity is output
+			return None
+
+		x_coordinate = int(self.x)
+		if not isinstance(x_coordinate, FieldElement):
+			x_coordinate = FieldElement(x_coordinate, self.curve.p)
+		Q = [ x_coordinate, self._x_double(x_coordinate), None ]
+		for bitno in reversed(range(scalar.bit_length() - 1)):
+			bit = (scalar >> bitno) & 1
+			Q[2] = self._x_double(Q[bit])
+			Q[1] = self._x_add(Q[0], Q[1], x_coordinate)
+			Q[0] = Q[2 - bit]
+			Q[1] = Q[1 + bit]
+		return Q[0]

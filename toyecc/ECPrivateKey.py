@@ -21,11 +21,11 @@
 #	Johannes Bauer <JohannesBauer@gmx.de>
 #
 
-from .PrivKeyOps import PrivKeyOpECDSASign, PrivKeyOpECIESDecrypt, PrivKeyOpEDDSASign, PrivKeyOpEDDSAKeyGen, PrivKeyOpEDDSAEncode, PrivKeyOpECDH, PrivKeyOpLoad, PrivKeyOpECDHXOnly
+from .PrivKeyOps import PrivKeyOpECDSASign, PrivKeyOpECIESDecrypt, PrivKeyOpEDDSASign, PrivKeyOpEDDSAKeyGen, PrivKeyOpEDDSAEncode, PrivKeyOpECDH, PrivKeyOpLoad
 from .ECPublicKey import ECPublicKey
 from .Random import secure_rand_int_between
 
-class ECPrivateKey(PrivKeyOpECDSASign, PrivKeyOpECIESDecrypt, PrivKeyOpEDDSASign, PrivKeyOpEDDSAKeyGen, PrivKeyOpEDDSAEncode, PrivKeyOpECDH, PrivKeyOpLoad, PrivKeyOpECDHXOnly):
+class ECPrivateKey(PrivKeyOpECDSASign, PrivKeyOpECIESDecrypt, PrivKeyOpEDDSASign, PrivKeyOpEDDSAKeyGen, PrivKeyOpEDDSAEncode, PrivKeyOpECDH, PrivKeyOpLoad):
 	"""Represents an elliptic curve private key."""
 
 	def __init__(self, scalar, curve):

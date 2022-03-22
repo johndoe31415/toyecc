@@ -22,11 +22,47 @@
 #
 
 import unittest
-from .. import getcurvebyname, ECPrivateKey
+from .. import getcurvebyname, ECPrivateKey, ShortWeierstrassCurve, AffineCurvePoint
 
 class XOnlyTests(unittest.TestCase):
 	def test_xonly_mul(self):
 		curve = getcurvebyname("secp112r1")
-		key = ECPrivateKey.generate(curve)
-		x = key.scalar_mul_xonly(curve.G.x)
-		self.assertEqual(x, key.pubkey.point.x)
+		privkey = ECPrivateKey.generate(curve)
+		x = curve.G.scalar_mul_xonly(privkey.scalar)
+		self.assertEqual(x, privkey.pubkey.point.x)
+
+	def test_small_subgroup_P2(self):
+		curve = ShortWeierstrassCurve(p = 101, a = 3, b = 9, Gx = 0, Gy = 3, h = 1, n = 114)
+		P2 = AffineCurvePoint(55, 0, curve)
+		self.assertEqual(P2.scalar_mul_xonly(0), None)
+		self.assertEqual(P2.scalar_mul_xonly(1), 55)
+		self.assertEqual(P2.scalar_mul_xonly(2), None)
+		self.assertEqual(P2.scalar_mul_xonly(3), 55)
+
+	def test_small_subgroup_P3(self):
+		curve = ShortWeierstrassCurve(p = 101, a = 3, b = 9, Gx = 0, Gy = 3, h = 1, n = 114)
+		P3 = AffineCurvePoint(18, 21, curve)
+		for i in range(20):
+			j = i % 3
+			if j == 0:
+				self.assertEqual(P3.scalar_mul_xonly(i), None)
+			else:
+				self.assertEqual(P3.scalar_mul_xonly(i), 18)
+
+	def test_small_subgroup_P6(self):
+		curve = ShortWeierstrassCurve(p = 101, a = 3, b = 9, Gx = 0, Gy = 3, h = 1, n = 114)
+		P6 = AffineCurvePoint(99, 46, curve)
+		for i in range(20):
+			j = i % 6
+			if j == 0:
+				self.assertEqual(P6.scalar_mul_xonly(i), None)
+			elif j == 1:
+				self.assertEqual(P6.scalar_mul_xonly(i), 0x63)
+			elif j == 2:
+				self.assertEqual(P6.scalar_mul_xonly(i), 0x12)
+			elif j == 3:
+				self.assertEqual(P6.scalar_mul_xonly(i), 0x37)
+			elif j == 4:
+				self.assertEqual(P6.scalar_mul_xonly(i), 0x12)
+			else:
+				self.assertEqual(P6.scalar_mul_xonly(i), 0x63)
