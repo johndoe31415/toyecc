@@ -92,4 +92,4 @@ from .ECPublicKey import ECPublicKey
 from .ShortWeierstrassCurve import ShortWeierstrassCurve
 from .CRT import CRT
 
-VERSION = "0.0.8rc0"
+VERSION = "0.0.8"
